@@ -1,0 +1,246 @@
+gplink-1.4.0 #1107 (Jan  1 2021)
+Copyright (c) 1998-2014 gputils project
+Listing File Generated: 8-23-2024  22:08:04
+ 
+ 
+Address  Value    Disassembly              Source
+-------  -----    -----------              ------
+                                           ;--------------------------------------------------------
+                                           ; File Created by SDCC : free open source ANSI-C Compiler
+                                           ; Version 4.0.0 #11528 (Linux)
+                                           ;--------------------------------------------------------
+                                           ; PIC port for the 14-bit core
+                                           ;--------------------------------------------------------
+                                           ;	.file	"blink.c"
+                                           	list	p=12f675
+                                           	radix dec
+                                           	include "p12f675.inc"
+                                                   LIST
+                                           
+                                           ;==========================================================================
+                                           ; Build date : Aug 07 2014
+                                           ;  MPASM PIC12F675 processor include
+                                           ; 
+                                           ;  (c) Copyright 1999-2014 Microchip Technology, All rights reserved
+                                           ;==========================================================================
+                                           
+                                                   NOLIST
+                                           ;--------------------------------------------------------
+                                           ; external declarations
+                                           ;--------------------------------------------------------
+                                           	extern	_TRISIO
+                                           	extern	_GPIO
+                                           	extern	_GPIObits
+                                           	extern	__sdcc_gsinit_startup
+                                           ;--------------------------------------------------------
+                                           ; global declarations
+                                           ;--------------------------------------------------------
+                                           	global	_main
+                                           	global	_delay
+                                           
+                                           	global PSAVE
+                                           	global SSAVE
+                                           	global WSAVE
+                                           	global STK12
+                                           	global STK11
+                                           	global STK10
+                                           	global STK09
+                                           	global STK08
+                                           	global STK07
+                                           	global STK06
+                                           	global STK05
+                                           	global STK04
+                                           	global STK03
+                                           	global STK02
+                                           	global STK01
+                                           	global STK00
+                                           
+                                           sharebank udata_ovr 0x0020
+                                           PSAVE	res 1
+                                           SSAVE	res 1
+                                           WSAVE	res 1
+                                           STK12	res 1
+                                           STK11	res 1
+                                           STK10	res 1
+                                           STK09	res 1
+                                           STK08	res 1
+                                           STK07	res 1
+                                           STK06	res 1
+                                           STK05	res 1
+                                           STK04	res 1
+                                           STK03	res 1
+                                           STK02	res 1
+                                           STK01	res 1
+                                           STK00	res 1
+                                           
+                                           ;--------------------------------------------------------
+                                           ; global definitions
+                                           ;--------------------------------------------------------
+                                           ;--------------------------------------------------------
+                                           ; absolute symbol definitions
+                                           ;--------------------------------------------------------
+                                           ;--------------------------------------------------------
+                                           ; compiler-defined variables
+                                           ;--------------------------------------------------------
+                                           UDL_blink_0	udata
+                                           r0x1008	res	1
+                                           r0x1001	res	1
+                                           r0x1000	res	1
+                                           r0x1002	res	1
+                                           r0x1003	res	1
+                                           r0x1004	res	1
+                                           r0x1005	res	1
+                                           r0x1006	res	1
+                                           r0x1007	res	1
+                                           ;--------------------------------------------------------
+                                           ; initialized data
+                                           ;--------------------------------------------------------
+                                           ;--------------------------------------------------------
+                                           ; initialized absolute data
+                                           ;--------------------------------------------------------
+                                           ;--------------------------------------------------------
+                                           ; overlayable items in internal ram 
+                                           ;--------------------------------------------------------
+                                           ;	udata_ovr
+                                           ;--------------------------------------------------------
+                                           ; reset vector 
+                                           ;--------------------------------------------------------
+                                           STARTUP	code 0x0000
+000000   0000     nop                      	nop
+                                           	pagesel __sdcc_gsinit_startup
+000001   2802     goto    0x0002           	goto	__sdcc_gsinit_startup
+                                           ;--------------------------------------------------------
+                                           ; code
+                                           ;--------------------------------------------------------
+                                           code_blink	code
+                                           ;***
+                                           ;  pBlock Stats: dbName = M
+                                           ;***
+                                           ;has an exit
+                                           ;functions called:
+                                           ;   _delay
+                                           ;   _delay
+                                           ;   _delay
+                                           ;   _delay
+                                           ;2 compiler assigned registers:
+                                           ;   STK00
+                                           ;   r0x1008
+                                           ;; Starting pCode block
+                                           S_blink__main	code
+                                           _main:
+                                           ; 2 exit points
+                                           ;	.line	29; "blink.c"	TRISIO = 0b00000000; //Poner todos los pines como salidas
+0000f9   1683     bsf     0x03, 0x5        	BANKSEL	_TRISIO
+0000fa   0185     clrf    0x05             	CLRF	_TRISIO
+                                           ;	.line	30; "blink.c"	GPIO = 0x00; //Poner pines en bajo
+0000fb   1283     bcf     0x03, 0x5        	BANKSEL	_GPIO
+0000fc   0185     clrf    0x05             	CLRF	_GPIO
+                                           _00106_DS_:
+                                           ;	.line	37; "blink.c"	GP0 = 0x00;
+0000fd   1283     bcf     0x03, 0x5        	BANKSEL	_GPIObits
+0000fe   1005     bcf     0x05, 0x0        	BCF	_GPIObits,0
+                                           ;	.line	38; "blink.c"	delay(time);
+0000ff   3064     movlw   0x64             	MOVLW	0x64
+000100   00af     movwf   0x2f             	MOVWF	STK00
+000101   3000     movlw   0x00             	MOVLW	0x00
+                                           	PAGESEL	_delay
+000102   20d2     call    0x00d2           	CALL	_delay
+                                           	PAGESEL	$
+                                           ;	.line	40; "blink.c"	GP0 = ~GP0;
+000103   01bc     clrf    0x3c             	CLRF	r0x1008
+000104   1283     bcf     0x03, 0x5        	BANKSEL	_GPIObits
+000105   1805     btfsc   0x05, 0x0        	BTFSC	_GPIObits,0
+000106   0abc     incf    0x3c, 0x1        	INCF	r0x1008,F
+000107   093c     comf    0x3c, 0x0        	COMF	r0x1008,W
+000108   00bc     movwf   0x3c             	MOVWF	r0x1008
+000109   0c3c     rrf     0x3c, 0x0        	RRF	r0x1008,W
+00010a   1c03     btfss   0x03, 0x0        	BTFSS	STATUS,0
+00010b   1005     bcf     0x05, 0x0        	BCF	_GPIObits,0
+00010c   1803     btfsc   0x03, 0x0        	BTFSC	STATUS,0
+00010d   1405     bsf     0x05, 0x0        	BSF	_GPIObits,0
+                                           ;	.line	41; "blink.c"	delay(time);
+00010e   3064     movlw   0x64             	MOVLW	0x64
+00010f   00af     movwf   0x2f             	MOVWF	STK00
+000110   3000     movlw   0x00             	MOVLW	0x00
+                                           	PAGESEL	_delay
+000111   20d2     call    0x00d2           	CALL	_delay
+                                           	PAGESEL	$
+000112   28fd     goto    0x00fd           	GOTO	_00106_DS_
+                                           ;	.line	44; "blink.c"	}
+000113   0008     return                   	RETURN	
+                                           ; exit point of _main
+                                           
+                                           ;***
+                                           ;  pBlock Stats: dbName = C
+                                           ;***
+                                           ;has an exit
+                                           ;9 compiler assigned registers:
+                                           ;   r0x1000
+                                           ;   STK00
+                                           ;   r0x1001
+                                           ;   r0x1002
+                                           ;   r0x1003
+                                           ;   r0x1004
+                                           ;   r0x1005
+                                           ;   r0x1006
+                                           ;   r0x1007
+                                           ;; Starting pCode block
+                                           S_blink__delay	code
+                                           _delay:
+                                           ; 2 exit points
+                                           ;	.line	46; "blink.c"	void delay(unsigned int tiempo)
+0000d2   00be     movwf   0x3e             	MOVWF	r0x1000
+0000d3   082f     movf    0x2f, 0x0        	MOVF	STK00,W
+0000d4   00bd     movwf   0x3d             	MOVWF	r0x1001
+                                           ;	.line	51; "blink.c"	for(i=0;i<tiempo;i++)
+0000d5   01bf     clrf    0x3f             	CLRF	r0x1002
+0000d6   01c0     clrf    0x40             	CLRF	r0x1003
+                                           _00117_DS_:
+0000d7   083e     movf    0x3e, 0x0        	MOVF	r0x1000,W
+0000d8   0240     subwf   0x40, 0x0        	SUBWF	r0x1003,W
+0000d9   1d03     btfss   0x03, 0x2        	BTFSS	STATUS,2
+0000da   28dd     goto    0x00dd           	GOTO	_00138_DS_
+0000db   083d     movf    0x3d, 0x0        	MOVF	r0x1001,W
+0000dc   023f     subwf   0x3f, 0x0        	SUBWF	r0x1002,W
+                                           _00138_DS_:
+0000dd   1803     btfsc   0x03, 0x0        	BTFSC	STATUS,0
+0000de   28f8     goto    0x00f8           	GOTO	_00119_DS_
+                                           ;;genSkipc:3307: created from rifx:0x7ffc43f09240
+                                           ;	.line	52; "blink.c"	for(j=0;j<1275;j++);
+0000df   30fb     movlw   0xfb             	MOVLW	0xfb
+0000e0   00c1     movwf   0x41             	MOVWF	r0x1004
+0000e1   3004     movlw   0x04             	MOVLW	0x04
+0000e2   00c2     movwf   0x42             	MOVWF	r0x1005
+                                           _00115_DS_:
+0000e3   30ff     movlw   0xff             	MOVLW	0xff
+0000e4   0741     addwf   0x41, 0x0        	ADDWF	r0x1004,W
+0000e5   00c3     movwf   0x43             	MOVWF	r0x1006
+0000e6   30ff     movlw   0xff             	MOVLW	0xff
+0000e7   00c4     movwf   0x44             	MOVWF	r0x1007
+0000e8   0842     movf    0x42, 0x0        	MOVF	r0x1005,W
+0000e9   1803     btfsc   0x03, 0x0        	BTFSC	STATUS,0
+0000ea   0f42     incfsz  0x42, 0x0        	INCFSZ	r0x1005,W
+0000eb   07c4     addwf   0x44, 0x1        	ADDWF	r0x1007,F
+0000ec   0843     movf    0x43, 0x0        	MOVF	r0x1006,W
+0000ed   00c1     movwf   0x41             	MOVWF	r0x1004
+0000ee   0844     movf    0x44, 0x0        	MOVF	r0x1007,W
+0000ef   00c2     movwf   0x42             	MOVWF	r0x1005
+0000f0   0844     movf    0x44, 0x0        	MOVF	r0x1007,W
+0000f1   0443     iorwf   0x43, 0x0        	IORWF	r0x1006,W
+0000f2   1d03     btfss   0x03, 0x2        	BTFSS	STATUS,2
+0000f3   28e3     goto    0x00e3           	GOTO	_00115_DS_
+                                           ;	.line	51; "blink.c"	for(i=0;i<tiempo;i++)
+0000f4   0abf     incf    0x3f, 0x1        	INCF	r0x1002,F
+0000f5   1903     btfsc   0x03, 0x2        	BTFSC	STATUS,2
+0000f6   0ac0     incf    0x40, 0x1        	INCF	r0x1003,F
+0000f7   28d7     goto    0x00d7           	GOTO	_00117_DS_
+                                           _00119_DS_:
+                                           ;	.line	53; "blink.c"	}
+0000f8   0008     return                   	RETURN	
+                                           ; exit point of _delay
+                                           
+                                           
+                                           ;	code size estimation:
+                                           ;	   62+    8 =    70 instructions (  156 byte)
+                                           
+                                           	end
