@@ -12,10 +12,9 @@ void main(void)
 	GPIO = 0x00; //Poner pines en bajo
 	//WPU = 0b00010000;
 	//NOT_GPPU =0;
- 	unsigned int antiguo = 0;
-	unsigned int actual = 0;
-	unsigned int generar = 0;
-	unsigned int nrandom = 0;
+
+	unsigned short int actual = 0;
+	unsigned short int nrandom = 0;
     	unsigned int time = 0.05;
 	unsigned int numbers[10];
 	unsigned int j = 0;
@@ -23,30 +22,28 @@ void main(void)
     //Loop forever
     while ( 1 )
     {
-		antiguo = actual;
-		actual = GP3;
-		//GP4 = GP3;
-		
-		if ((antiguo==1)&&(actual==0)) generar = 1;
-		
-		while ((generar == 1)&&(GP3==0)){
-			for(int i=0;i<nrandom;i++){
-				GP0 = 0x00;
-				delay(time);
-				GP0 = ~GP0;
-				delay(time);
+			
+			while (GP3 == 1){	//generar numero pseudorandom
+				actual = 0;
+				if (nrandom < 99) nrandom = nrandom + 1;
+				else nrandom = nrandom = 0; //que no se pase de 99
+				if (nrandom!=0) GP1 = 0;
 			}
-			generar=0;			
-		}
-
-		while (GP3 == 1){	//generar numero pseudorandom
-			//nrandom = (nrandom == 99) ? 0 : nrandom + 1; //que no se pase de 99
-			if (nrandom == 99) nrandom = 0;
-			else nrandom++;
+			
+			
+			
+			while(GP3==0){
+					//GP1=0;
+					while (actual < nrandom)
+					{
+						GP0 = 0x00;
+						delay(time);
+						GP0 = ~GP0;
+						delay(time);
+						actual++;
+					}
+												
 			}
-
-		
-		
 		
 		//generar es para emitir la variable sólo una vezdespués de apretar el botón
 							
