@@ -8,7 +8,7 @@ void delay (unsigned int tiempo);
 void main(void)
 {
 
-     TRISIO = 0b00010000; //Poner todos los pines como salidas
+     TRISIO = 0b00001000; //Poner todos los pines como salidas
 	GPIO = 0x00; //Poner pines en bajo
 	//WPU = 0b00010000;
 	//NOT_GPPU =0;
@@ -16,22 +16,20 @@ void main(void)
 	unsigned int actual = 0;
 	unsigned int generar = 0;
 	unsigned int nrandom = 0;
-    	unsigned int time = 100;
+    	unsigned int time = 0.05;
+	unsigned int numbers[10];
+	unsigned int j = 0;
  
     //Loop forever
     while ( 1 )
     {
 		antiguo = actual;
-		actual = (GPIO & 0x10) >> 4;
+		actual = GP3;
+		//GP4 = GP3;
 		
-		while (actual == 1){	//generar numero pseudorandom
-			nrandom = (nrandom == 99) ? 0 : nrandom + 1; //que no se pase de 99
-			}
-			
 		if ((antiguo==1)&&(actual==0)) generar = 1;
 		
-		//generar es para emitir la variable sólo una vezdespués de apretar el botón
-		while (generar == 1){
+		while ((generar == 1)&&(GP3==0)){
 			for(int i=0;i<nrandom;i++){
 				GP0 = 0x00;
 				delay(time);
@@ -39,7 +37,19 @@ void main(void)
 				delay(time);
 			}
 			generar=0;			
-		}					
+		}
+
+		while (GP3 == 1){	//generar numero pseudorandom
+			//nrandom = (nrandom == 99) ? 0 : nrandom + 1; //que no se pase de 99
+			if (nrandom == 99) nrandom = 0;
+			else nrandom++;
+			}
+
+		
+		
+		
+		//generar es para emitir la variable sólo una vezdespués de apretar el botón
+							
     }
  
 
