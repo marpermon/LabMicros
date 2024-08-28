@@ -1,0 +1,6 @@
+lab1/*.cod
+lab1/*.hex
+lab1/*.o
+lab1/*.lst
+lab1/*.asm
+lab1/Makefile
