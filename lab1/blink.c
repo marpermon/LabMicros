@@ -1,46 +1,48 @@
 #include <pic14/pic12f683.h>
+typedef unsigned int word ;
+word __at 0x2007 __CONFIG = _WDTE_OFF & _PWRTE_OFF & _MCLRE_OFF & _CP_OFF & _CPD_OFF & _BOREN_OFF & _IESO_OFF & _FCMEN_OFF;
+
  
-//To compile:
-//sdcc -mpic14 -p16f675 blink.c
- 
-//To program the chip using picp:
-//Assuming /dev/ttyUSB0 is the serial port.
- 
-//Erase the chip:
-//picp /dev/ttyUSB0 16f887 -ef
- 
-//Write the program:
-//picp /dev/ttyUSB0 16f887 -wp blink.hex
- 
-//Write the configuration words (optional):
-//picp /dev/ttyUSB0 16f887 -wc 0x2ff4 0x3fff
- 
-//Doing it all at once: erasing, programming, and reading back config words:
-//picp /dev/ttyUSB0 16f887 -ef -wp blink.hex -rc
- 
-//To program the chip using pk2cmd:
-//pk2cmd -M -PPIC16f887 -Fblink.hex
- 
-void delay (unsigned inttiempo);
+void delay (unsigned int tiempo);
  
 void main(void)
 {
 
-    TRISIO = 0b00000000; //Poner todos los pines como salidas
+     TRISIO = 0b00010000; //Poner todos los pines como salidas
 	GPIO = 0x00; //Poner pines en bajo
- 
-    unsigned int time = 100;
+	//WPU = 0b00010000;
+	//NOT_GPPU =0;
+ 	unsigned int antiguo = 0;
+	unsigned int actual = 0;
+	unsigned int generar = 0;
+	unsigned int nrandom = 0;
+    	unsigned int time = 100;
  
     //Loop forever
     while ( 1 )
     {
-			GP0 = 0x00;
-			delay(time);
-
-			GP0 = ~GP0;
-			delay(time);
+		antiguo = actual;
+		actual = (GPIO & 0x10) >> 4;
+		
+		while (actual == 1){	//generar numero pseudorandom
+			nrandom = (nrandom == 99) ? 0 : nrandom + 1; //que no se pase de 99
+			}
+			
+		if ((antiguo==1)&&(actual==0)) generar = 1;
+		
+		//generar es para emitir la variable sólo una vezdespués de apretar el botón
+		while (generar == 1){
+			for(int i=0;i<nrandom;i++){
+				GP0 = 0x00;
+				delay(time);
+				GP0 = ~GP0;
+				delay(time);
+			}
+			generar=0;			
+		}					
     }
  
+
 }
 
 void delay(unsigned int tiempo)
@@ -49,5 +51,5 @@ void delay(unsigned int tiempo)
 	unsigned int j;
 
 	for(i=0;i<tiempo;i++)
-	  for(j=0;j<1275;j++);
+	  for(j=0;j<1275;j++);//1275=1s?
 }
