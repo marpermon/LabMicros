@@ -13,44 +13,41 @@ void main(void)
 	//WPU = 0b00010000;
 	//NOT_GPPU =0;
 
-	unsigned short int actual = 0;
-	unsigned short int nrandom = 0;
-    	unsigned int time = 0.05;
+	unsigned short int actual = 0, nrandom = 0;
+	enum estado {generando, emitiendo};
+	unsigned short int state = generando;
+    	float time = 0.1;
 	unsigned int numbers[10];
-	unsigned int j = 0;
+	
  
-    //Loop forever
-    while ( 1 )
-    {
-			
+while(1){
+	
+	switch (state){
+		case generando:
+		//la primera vez, si GP3==0 no se hace nada hasta que se active
 			while (GP3 == 1){	//generar numero pseudorandom
 				actual = 0;
 				if (nrandom < 99) nrandom = nrandom + 1;
-				else nrandom = nrandom = 0; //que no se pase de 99
-				if (nrandom!=0) GP1 = 0;
+				else nrandom = 0; //que no se pase de 99
 			}
-			
-			
-			
-			while(GP3==0){
-					//GP1=0;
-					while (actual < nrandom)
-					{
-						GP0 = 0x00;
-						delay(time);
-						GP0 = ~GP0;
-						delay(time);
-						actual++;
-					}
-												
-			}
+			state = generando;
 		
-		//generar es para emitir la variable sólo una vezdespués de apretar el botón
-							
-    }
+		case emitiendo:	
+			while((GP3==0)&&(actual < nrandom))
+				{
+				GP0 = 0x00;
+				delay(time);
+				GP0 = ~GP0;
+				delay(time);
+				actual++;									
+			}
+			if (actual>=nrandom ) state = generando;
+		}
+	}	
+		//generar es para emitir la variable sólo una vezdespués de apretar el botón							
+}
  
 
-}
 
 void delay(unsigned int tiempo)
 {
