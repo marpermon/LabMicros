@@ -22,7 +22,7 @@ void main(void){
 			if (nrandom < 99) nrandom = nrandom + 1;
 			else nrandom = 0;
 			if(GP3==1){
-				if(GP1 = 0){//para que sólo suceda la primera vez 
+				if(GP1 == 0){//para que sólo suceda la primera vez 
 					for (int j=0; j<10; j++){
 						if(nrandom == numbers[j]){
 							pulse(TIME);
