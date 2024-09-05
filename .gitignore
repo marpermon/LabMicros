@@ -1,7 +1,7 @@
-lab1/src/*.cod
-lab1/src/*.hex
-lab1/src/*.o
-lab1/src/*.lst
-lab1/src/*.asm
-lab1/src/Makefile
+*/src/*.cod
+*/src/*.hex
+*/src/*.o
+*/src/*.lst
+*/src/*.asm
+*/src/Makefile
 SimulIDE_0.4.15-SR10_Win32/
