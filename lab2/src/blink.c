@@ -24,10 +24,18 @@ volatile bool completo = false;
 volatile bool esEntradaCorrecta = false;
 volatile int patron[] = {1,2,4,3,1,1,3,4,2,3}; //leds que se encenderán
 volatile int contador = 0;
+static bool PB7_anterior; //flanco decreciente
+static bool PB6_anterior; //flanco decreciente
+static bool PB5_anterior; //flanco decreciente
+static bool PB4_anterior; //flanco decreciente
 
 // Lógica de entradas
 
 ISR(PCINT_B_vect){ //subrutina de interrupción con el vector pcint0
+bool PB7_actual = (PINB & (1 << PB7));
+bool PB6_actual = (PINB & (1 << PB6));
+bool PB5_actual = (PINB & (1 << PB5));
+bool PB4_actual = (PINB & (1 << PB4));
     switch (estado) {
         case IDLE:
             if (!BotonEncendido){
@@ -39,23 +47,19 @@ ISR(PCINT_B_vect){ //subrutina de interrupción con el vector pcint0
         if (contador < parpadeos)
         {
             if (patron[contador] == 4) {
-                if(PINB7) {
-                    if (!PINB7) contador++;} //para que se accione en el flanco negativo
+                if (!PB7_actual && PB7_anterior) contador++; //para que se accione en el flanco negativo
                 else if (PINB6 | PINB5 | PINB4) completo = true; // la lógica de estados reconoce completo para que se salga de este flujo
             }                    
             else if (patron[contador] == 3) {
-                if (PINB6) {
-                    if (!PINB6) contador++;}
+                if (!PB6_actual && PB6_anterior) contador++;
                 else if (PINB7 | PINB5 | PINB4) completo = true;
             }
             else if (patron[contador] == 2) {
-                if (PINB5) {
-                    if (!PINB5) contador++;}
+                if (!PB5_actual && PB5_anterior) contador++;
                 else if (PINB6 | PINB7 | PINB4) completo = true;
             }
             else if (patron[contador] == 0) {
-                if (PINB4) {
-                    if (!PINB4) contador++;}
+                if (!PB4_actual && PB4_anterior) contador++;
                 else if (PINB6 | PINB5 | PINB7) completo = true;
             }            
         } else{
@@ -68,6 +72,10 @@ ISR(PCINT_B_vect){ //subrutina de interrupción con el vector pcint0
             //estado = IDLE;
             break;
     }
+    PB7_anterior = PB7_actual;
+    PB6_anterior = PB6_actual;
+    PB5_anterior = PB5_actual;
+    PB4_anterior = PB4_actual;
 }
 
 
