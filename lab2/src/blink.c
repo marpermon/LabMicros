@@ -1,9 +1,11 @@
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <stdbool.h> // para usar bools
 
 #define INICIAL_PARPADEOS 4
 #define INICIAL_PERIODO 2000 // en milisegundos
 
+void delay_ms_p(int milliseconds); //funcion propia
 void parpadear(int cantidad, int periodo);
 void emitirLuces(int parpadeos);
 typedef enum {
@@ -12,14 +14,14 @@ typedef enum {
     ESPERA_ENTRADA      // Espera entrada
 } Estado;
 
-int parpadeos = INICIAL_PARPADEOS;
-int periodo = INICIAL_PERIODO;
+volatile int millis_counter = 0;
+volatile int parpadeos = INICIAL_PARPADEOS;
+volatile int periodo = INICIAL_PERIODO;
 volatile bool BotonEncendido = false;
 volatile bool completo = false;
-volatile bool delay = false;
 volatile bool esEntradaCorrecta = false;
-int patron[] = {1,2,4,3,1,1,3,4,2,3} //leds que se encenderán
-int contador = 0;
+volatile int patron[] = {1,2,4,3,1,1,3,4,2,3}; //leds que se encenderán
+volatile int contador = 0;
 
 // Lógica de entradas
 
@@ -53,8 +55,7 @@ ISR(PCINT0_vect){ //subrutina de interrupción con el vector pcint0
                     if (PINB4) {
                         if (~PINB4) contador++;}
                     else if (PINB6 | PINB5 | PINB7) completo = true;
-                }
-            
+                }            
             } else{
                 completo = true;
                 esEntradaCorrecta = true; 
@@ -70,18 +71,24 @@ ISR(PCINT0_vect){ //subrutina de interrupción con el vector pcint0
 
 ISR(TIMER0_OVF_vect)
 {
-    // Code for handling Timer 0 Overflow
+    millis_counter++;
 }
 
 int main(void)
 {
  DDRB = 0x0F; //Configuracion del puerto como entrada o salida
+ SREG |= (1 << I);
  GIMSK |= (1 << PCIE0);
  PCMSK0 |= (1 << PCINT7);
  PCMSK0 |= (1 << PCINT6);
  PCMSK0 |= (1 << PCINT5);
  PCMSK0 |= (1 << PCINT4);
- sei();
+ // Configure Timer0 in normal mode (default mode)
+TCCR0A = 0; // Normal mode
+TCCR0B = (1 << CS01) | (1 << CS00); // Set prescaler to 64
+// Enable Timer0 overflow interrupt
+TIMSK0 = (1 << TOIE0);
+sei();
 
   //Parpadear
   while (1) {
@@ -90,14 +97,14 @@ int main(void)
             // Configurar parpadeos iniciales y periodo               
                 // Verificar botón
                 if (BotonEncendido) {
-                    parpadear(parpadeos, periodo);
+                    parpadear(2, 100);
                     estado = PATRON;
                 }
                 break;
 
             case PATRON:
                 // Emitir luces para el patrón
-                emitirLuces(parpadeos);
+                emitirLuces(parpadeos, periodo);
                 estado = ESPERA_ENTRADA;
                 break;
 
@@ -113,7 +120,7 @@ int main(void)
 
                     // Verificar periodo para decidir el siguiente estado
                     if (periodo == 0) {
-                        parpadear(2, periodo); // Parpadeo parpadeos
+                        parpadear(4, 100); // Parpadeo 
                         // Volver al estado inicial
                         estado = IDLE;
                     } else {
@@ -123,12 +130,11 @@ int main(void)
 
                 } else if (~esEntradaCorrecta & completo){
                     // Si la entrada no es correcta, volver a IDLE
-                    parpadear(3, periodo); // Parpadeo parpadeos
+                    parpadear(3, 100); // Parpadeo parpadeos
                     // Volver al estado inicial
                     estado = IDLE;
                 }
                 break;
-
             default:
                 // Manejar estado desconocido
                 estado = IDLE;
@@ -141,35 +147,48 @@ int main(void)
 
 void parpadear(int cantidad, int periodo) {
     // Implementación para parpadear luces LED cantidad de veces con el periodo dado
-    
-    
+    for (int i = 0; i < cantidad; i++){   
+        PORTB3 = PORTB2 = PORTB1 = PORTB0 = 0b1;
+        delay_ms_p(periodo);
+        PORTB3 = PORTB2 = PORTB1 = PORTB0 = 0b0;
+        delay_ms_p(periodo);
+    }
 }
 
-
-void emitirLuces(int parpadeos) {
+void emitirLuces(int parpadeos, int periodo) {
     for (int i = 0; i < parpadeos; i++){
         if (patron[i] == 4) {
             PORTB3 = 0b1; 
-            delay = true;
-            if (delay == false) PORTB3 = 0b0;  
-
+            delay_ms_p(periodo);
+            PORTB3 = 0b0;
+            delay_ms_p(periodo);  
         } else if (patron[i] == 3) {
             PORTB2 = 0b1; 
-            delay = true;
-            if (delay == false) PORTB2 = 0b0;  
-
+            delay_ms_p(periodo); 
+            PORTB2 = 0b0;
+            delay_ms_p(periodo);  
         } else if (patron[i] == 2) {
             PORTB1 = 0b1; 
-            delay = true;
-            if (delay == false) PORTB1 = 0b0; 
-             
+            delay_ms_p(periodo); 
+            PORTB1 = 0b0;
+            delay_ms_p(periodo);          
         } else if (patron[i] == 0) {
             PORTB0 = 0b1;
-            delay = true;
-            if (delay == false) PORTB0 = 0b0; 
+            delay_ms_p(periodo); 
+            PORTB0 = 0b0;
+            delay_ms_p(periodo); 
         }
     }
 }
+
+
+void delay_ms_p(int milliseconds) { //funcion propia
+    int start = millis_counter;
+    while ((millis_counter - start) < milliseconds) {
+        
+    }
+}
+
 
 
 
