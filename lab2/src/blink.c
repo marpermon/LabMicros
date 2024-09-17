@@ -1,5 +1,4 @@
 #include <avr/io.h>
-#include <util/delay.h>
 
 #define INICIAL_PARPADEOS 4
 #define INICIAL_PERIODO 2000 // en milisegundos
@@ -17,11 +16,26 @@ typedef enum {
     ESPERA_ENTRADA      // Espera entrada
 } Estado;
 
+ISR(PCINT0_vect){ //subrutina de interrupción con el vector pcint0
+
+
+
+
+}
+
+
 int main(void)
 {
-  DDRB = 0x08; //Configuracion del puerto
-	int parpadeos = INICIAL_PARPADEOS;
-	int periodo = INICIAL_PERIODO;
+ DDRB = 0x0F; //Configuracion del puerto como entrada o salida
+ GIMSK |= (1 << PCIE0)
+ PCMSK0 |= (1 << PCINT7)
+ PCMSK0 |= (1 << PCINT6)
+ PCMSK0 |= (1 << PCINT5)
+ PCMSK0 |= (1 << PCINT4)
+ sei()
+
+int parpadeos = INICIAL_PARPADEOS;
+int periodo = INICIAL_PERIODO;
   //Parpadear
   while (1) {
         switch (estado) {
@@ -62,8 +76,8 @@ int main(void)
                     // Si el periodo no es 0, volver al patrón
                     estado = PATRON;
                 }
-                    
-                    
+
+
                 } else {
                     // Si la entrada no es correcta, volver al patrón
                     parpadear(3, periodo); // Parpadeo final
