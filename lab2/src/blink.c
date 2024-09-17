@@ -7,13 +7,14 @@
 
 void delay_ms_p(int milliseconds); //funcion propia
 void parpadear(int cantidad, int periodo);
-void emitirLuces(int parpadeos);
+void emitirLuces(int parpadeos, int periodo);
 typedef enum {
     IDLE,               // Estado inicial
     PATRON,             // Patrón
     ESPERA_ENTRADA      // Espera entrada
 } Estado;
 
+volatile Estado estado = IDLE;
 volatile int millis_counter = 0;
 volatile int parpadeos = INICIAL_PARPADEOS;
 volatile int periodo = INICIAL_PERIODO;
@@ -27,44 +28,44 @@ volatile int contador = 0;
 
 ISR(PCINT0_vect){ //subrutina de interrupción con el vector pcint0
     switch (estado) {
-            case IDLE:
-                if ((PINB7 | PINB6 | PINB5 | PINB4) & (~BotonEncendido)){
-                    BotonEncendido = true;
-                }
-                break;
-
-            case ESPERA_ENTRADA:
-            if (contador < parpadeos)
-            {
-                if (patron[contador] == 4) {
-                    if(PINB7) {
-                        if (~PINB7) contador++;} //para que se accione en el flanco negativo
-                    else if (PINB6 | PINB5 | PINB4) completo = true; // la lógica de estados reconoce completo para que se salga de este flujo
-                }                    
-                else if (patron[contador] == 3) {
-                    if (PINB6) {
-                        if (~PINB6) contador++;}
-                    else if (PINB7 | PINB5 | PINB4) completo = true;
-                }
-                else if (patron[contador] == 2) {
-                    if (PINB5) {
-                        if (~PINB5) contador++;}
-                    else if (PINB6 | PINB7 | PINB4) completo = true;
-                }
-                else if (patron[contador] == 0) {
-                    if (PINB4) {
-                        if (~PINB4) contador++;}
-                    else if (PINB6 | PINB5 | PINB7) completo = true;
-                }            
-            } else{
-                completo = true;
-                esEntradaCorrecta = true; 
+        case IDLE:
+            if (~BotonEncendido){
+                BotonEncendido = true;
             }
-            
-            default:
-                // Manejar estado desconocido
-                //estado = IDLE;
-                break;
+            break;
+
+        case ESPERA_ENTRADA:
+        if (contador < parpadeos)
+        {
+            if (patron[contador] == 4) {
+                if(PINB7) {
+                    if (~PINB7) contador++;} //para que se accione en el flanco negativo
+                else if (PINB6 | PINB5 | PINB4) completo = true; // la lógica de estados reconoce completo para que se salga de este flujo
+            }                    
+            else if (patron[contador] == 3) {
+                if (PINB6) {
+                    if (~PINB6) contador++;}
+                else if (PINB7 | PINB5 | PINB4) completo = true;
+            }
+            else if (patron[contador] == 2) {
+                if (PINB5) {
+                    if (~PINB5) contador++;}
+                else if (PINB6 | PINB7 | PINB4) completo = true;
+            }
+            else if (patron[contador] == 0) {
+                if (PINB4) {
+                    if (~PINB4) contador++;}
+                else if (PINB6 | PINB5 | PINB7) completo = true;
+            }            
+        } else{
+            completo = true;
+            esEntradaCorrecta = true; 
+        }
+        
+        default:
+            // Manejar estado desconocido
+            //estado = IDLE;
+            break;
     }break;
 }
 
@@ -77,12 +78,8 @@ ISR(TIMER0_OVF_vect)
 int main(void)
 {
  DDRB = 0x0F; //Configuracion del puerto como entrada o salida
- SREG |= (1 << I);
- GIMSK |= (1 << PCIE0);
- PCMSK0 |= (1 << PCINT7);
- PCMSK0 |= (1 << PCINT6);
- PCMSK0 |= (1 << PCINT5);
- PCMSK0 |= (1 << PCINT4);
+GIMSK |= 0x20; // 0x20 is 00100000 in binary, which sets the PCIE0 bit
+PCMSK0 |= 0xF0; // 0xF0 is 11110000 in binary, which sets bits 4 to 7
  // Configure Timer0 in normal mode (default mode)
 TCCR0A = 0; // Normal mode
 TCCR0B = (1 << CS01) | (1 << CS00); // Set prescaler to 64
@@ -148,9 +145,9 @@ sei();
 void parpadear(int cantidad, int periodo) {
     // Implementación para parpadear luces LED cantidad de veces con el periodo dado
     for (int i = 0; i < cantidad; i++){   
-        PORTB3 = PORTB2 = PORTB1 = PORTB0 = 0b1;
+       PORTB |= 0x0F; // Turn on all LEDs on PB0-PB3
         delay_ms_p(periodo);
-        PORTB3 = PORTB2 = PORTB1 = PORTB0 = 0b0;
+        PORTB &= ~0x0F; // Turn off all LEDs on PB0-PB3
         delay_ms_p(periodo);
     }
 }
