@@ -28,14 +28,17 @@ static bool PB7_anterior; //flanco decreciente
 static bool PB6_anterior; //flanco decreciente
 static bool PB5_anterior; //flanco decreciente
 static bool PB4_anterior; //flanco decreciente
-
+static bool PB7_actual;
+static bool PB6_actual;
+static bool PB5_actual;
+static bool PB4_actual;
 // Lógica de entradas
 
 ISR(PCINT_B_vect){ //subrutina de interrupción con el vector pcint0
-bool PB7_actual = (PINB & (1 << PB7));
-bool PB6_actual = (PINB & (1 << PB6));
-bool PB5_actual = (PINB & (1 << PB5));
-bool PB4_actual = (PINB & (1 << PB4));
+PB7_actual = (PINB & (1 << PB7));
+PB6_actual = (PINB & (1 << PB6));
+PB5_actual = (PINB & (1 << PB5));
+PB4_actual = (PINB & (1 << PB4));
     switch (estado) {
         case IDLE:
             if (!BotonEncendido){
