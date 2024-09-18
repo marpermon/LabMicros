@@ -34,6 +34,10 @@ volatile bool PB7_actual = false, PB6_actual = false, PB5_actual = false, PB4_ac
 
 
 ISR(PCINT_B_vect){ //subrutina de interrupción con el vector pcint0
+        PB7_anterior = PB7_actual;
+        PB6_anterior = PB6_actual;
+        PB5_anterior = PB5_actual;
+        PB4_anterior = PB4_actual;
         PB7_actual = (PINB & (1 << PB7)) != 0;  // Read the state of PB7
         PB6_actual = (PINB & (1 << PB6)) != 0;  // Read the state of PB6
         PB5_actual = (PINB & (1 << PB5)) != 0;  // Read the state of PB5
@@ -44,13 +48,8 @@ ISR(PCINT_B_vect){ //subrutina de interrupción con el vector pcint0
                 BotonEncendido = true;
             }
         }    
-        
-        PB7_anterior = PB7_actual;
-        PB6_anterior = PB6_actual;
-        PB5_anterior = PB5_actual;
-        PB4_anterior = PB4_actual;
         if (estado == ESPERA_ENTRADA) revisar = true;
-    
+           
 }
 
 
@@ -102,20 +101,20 @@ int main(void)
                     while (revisar){
                         switch (patron[contador]){
                             case 4:
-                                if (PB7_actual) contador++; //para que se accione en el flanco negativo
-                                else if (PB6_actual | PB5_actual | PB4_actual) completo = true; // la lógica de estados reconoce completo para que se salga de este flujo
+                                if ((PB7_anterior && !PB7_actual)) contador++; //para que se accione en el flanco negativo
+                                else if ((PB6_anterior && !PB6_actual) | (PB5_anterior && !PB5_actual) | (PB4_anterior && !PB4_actual)) completo = true; // la lógica de estados reconoce completo para que se salga de este flujo
                                 break;
                             case 3:
-                                if (PB6_actual) contador++;
-                                else if (PB7_actual | PB5_actual | PB4_actual) completo = true;
+                                if ((PB6_anterior && !PB6_actual)) contador++;
+                                else if ((PB7_anterior && !PB7_actual) | (PB5_anterior && !PB5_actual) | (PB4_anterior && !PB4_actual)) completo = true;
                                 break;
                             case 2:
-                                if (PB5_actual) contador++;
-                                else if (PB6_actual | PB7_actual | PB4_actual) completo = true;
+                                if ((PB5_anterior && !PB5_actual)) contador++;
+                                else if ((PB6_anterior && !PB6_actual) | (PB7_anterior && !PB7_actual) | (PB4_anterior && !PB4_actual)) completo = true;
                                 break;
                             case 1:
-                                if (PB4_actual) contador++;
-                                else if (PB6_actual | PB5_actual | PB7_actual) completo = true;
+                                if ((PB4_anterior && !PB4_actual)) contador++;
+                                else if ((PB6_anterior && !PB6_actual) | (PB5_anterior && !PB5_actual) | (PB7_anterior && !PB7_actual)) completo = true;
                                 break;            
                             default:
                                 break;
