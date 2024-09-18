@@ -21,7 +21,7 @@ volatile int millis_counter = 0;
 volatile int parpadeos = INICIAL_PARPADEOS;
 volatile int periodo = INICIAL_PERIODO;
 volatile int contador = 0;
-volatile int patron[] = {1,2,4,3,1,1,3,4,2,3}; //leds que se encenderán
+volatile int patron[] = {1,2,4,3,1,1,3,4,2,3,2,4,1}; //leds que se encenderán
 
 volatile bool revisar = false;
 volatile bool BotonEncendido = false;
@@ -44,34 +44,6 @@ ISR(PCINT_B_vect){ //subrutina de interrupción con el vector pcint0
                 BotonEncendido = true;
             }
         }    
-
-        /*if (contador < parpadeos)
-        {
-            switch (patron[contador])
-            {
-            case 4:
-                if (!PB7_actual && PB7_anterior) contador++; //para que se accione en el flanco negativo
-                else if (PINB6 | PINB5 | PINB4) completo = true; // la lógica de estados reconoce completo para que se salga de este flujo
-                break;
-            case 3:
-                if (!PB6_actual && PB6_anterior) contador++;
-                else if (PINB7 | PINB5 | PINB4) completo = true;
-                break;
-            case 2:
-                if (!PB5_actual && PB5_anterior) contador++;
-                else if (PINB6 | PINB7 | PINB4) completo = true;
-                break;
-            case 1:
-                if (!PB4_actual && PB4_anterior) contador++;
-                else if (PINB6 | PINB5 | PINB7) completo = true;
-                break;            
-            default:
-                break;
-            }           
-        } else{
-            completo = true;
-            esEntradaCorrecta = true; 
-        }*/
         
         PB7_anterior = PB7_actual;
         PB6_anterior = PB6_actual;
