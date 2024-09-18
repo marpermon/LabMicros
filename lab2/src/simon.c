@@ -27,7 +27,6 @@ volatile bool revisar = false;
 volatile bool BotonEncendido = false;
 volatile bool completo = false;
 volatile bool esEntradaCorrecta = false;
-volatile bool PB7_anterior = false, PB6_anterior = false, PB5_anterior = false, PB4_anterior = false; //flanco decreciente
 volatile bool PB7_actual = false, PB6_actual = false, PB5_actual = false, PB4_actual = false;
 // Lógica de entradas
 
@@ -40,15 +39,10 @@ ISR(PCINT_B_vect){ //subrutina de interrupción con el vector pcint0
         PB4_actual = (PINB & (1 << PB4)) != 0;  // Read the state of PB4
     
         if (estado == IDLE) {
-            if ((PB7_anterior && !PB7_actual) || (PB6_anterior && !PB6_actual) || (PB5_anterior && !PB5_actual) || (PB4_anterior && !PB4_actual)){
+            if ((PB7_actual) || (PB6_actual) || (PB5_actual) || (PB4_actual)){
                 BotonEncendido = true;
             }
-        }    
-        
-        PB7_anterior = PB7_actual;
-        PB6_anterior = PB6_actual;
-        PB5_anterior = PB5_actual;
-        PB4_anterior = PB4_actual;
+        }           
         if (estado == ESPERA_ENTRADA) revisar = true;
     
 }
