@@ -108,7 +108,9 @@ int main(void)
     while (1) {
         switch (estado) {
             case IDLE:
-            // Configurar parpadeos iniciales y periodo               
+            // Configurar parpadeos iniciales y periodo 
+            parpadeos = INICIAL_PARPADEOS;
+            periodo = INICIAL_PERIODO;              
                 // Verificar botón
                 if (BotonEncendido) {
                     parpadear(2, PERIODO_OTROS);
@@ -177,6 +179,9 @@ int main(void)
                     parpadear(3, PERIODO_OTROS); // Parpadeo parpadeos
                     // Volver al estado inicial
                     estado = IDLE;
+                    esEntradaCorrecta = false; // reseteamos para la siguiente iteración
+                    completo = false;
+                    contador = 0; // se reinicia
                 }
                 break;
             default:
@@ -200,6 +205,7 @@ void parpadear(int cantidad, int periodo) {
 }
 
 void emitirLuces(int parpadeos, int periodo) {
+    delay_ms_p(300);
     for (int i = 0; i < parpadeos; i++){
         if (patron[i] == 4) {
             PORTB |= (1 << PB3); // Enciende el LED en PB3
