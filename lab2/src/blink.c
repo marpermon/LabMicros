@@ -4,6 +4,7 @@
 
 #define INICIAL_PARPADEOS 4
 #define INICIAL_PERIODO 2000 // en milisegundos
+#define PERIODO_OTROS 500 // en milisegundos
 
 void delay_ms_p(int milliseconds); //funcion propia
 void parpadear(int cantidad, int periodo);
@@ -19,66 +20,65 @@ volatile Estado estado = IDLE;
 volatile int millis_counter = 0;
 volatile int parpadeos = INICIAL_PARPADEOS;
 volatile int periodo = INICIAL_PERIODO;
+volatile int contador = 0;
+volatile int patron[] = {1,2,4,3,1,1,3,4,2,3}; //leds que se encenderán
+
+volatile bool revisar = false;
 volatile bool BotonEncendido = false;
 volatile bool completo = false;
 volatile bool esEntradaCorrecta = false;
-volatile int patron[] = {1,2,4,3,1,1,3,4,2,3}; //leds que se encenderán
-volatile int contador = 0;
-static bool PB7_anterior; //flanco decreciente
-static bool PB6_anterior; //flanco decreciente
-static bool PB5_anterior; //flanco decreciente
-static bool PB4_anterior; //flanco decreciente
-static bool PB7_actual;
-static bool PB6_actual;
-static bool PB5_actual;
-static bool PB4_actual;
+volatile bool PB7_anterior = false, PB6_anterior = false, PB5_anterior = false, PB4_anterior = false; //flanco decreciente
+volatile bool PB7_actual = false, PB6_actual = false, PB5_actual = false, PB4_actual = false;
 // Lógica de entradas
 
+
+
 ISR(PCINT_B_vect){ //subrutina de interrupción con el vector pcint0
-PB7_actual = (PINB & (1 << PB7));
-PB6_actual = (PINB & (1 << PB6));
-PB5_actual = (PINB & (1 << PB5));
-PB4_actual = (PINB & (1 << PB4));
-    switch (estado) {
-        case IDLE:
-            if (!BotonEncendido){
+        PB7_actual = (PINB & (1 << PB7)) != 0;  // Read the state of PB7
+        PB6_actual = (PINB & (1 << PB6)) != 0;  // Read the state of PB6
+        PB5_actual = (PINB & (1 << PB5)) != 0;  // Read the state of PB5
+        PB4_actual = (PINB & (1 << PB4)) != 0;  // Read the state of PB4
+    
+        if (estado == IDLE) {
+            if ((PB7_anterior && !PB7_actual) || (PB6_anterior && !PB6_actual) || (PB5_anterior && !PB5_actual) || (PB4_anterior && !PB4_actual)){
                 BotonEncendido = true;
             }
-            break;
+        }    
 
-        case ESPERA_ENTRADA:
-        if (contador < parpadeos)
+        /*if (contador < parpadeos)
         {
-            if (patron[contador] == 4) {
+            switch (patron[contador])
+            {
+            case 4:
                 if (!PB7_actual && PB7_anterior) contador++; //para que se accione en el flanco negativo
                 else if (PINB6 | PINB5 | PINB4) completo = true; // la lógica de estados reconoce completo para que se salga de este flujo
-            }                    
-            else if (patron[contador] == 3) {
+                break;
+            case 3:
                 if (!PB6_actual && PB6_anterior) contador++;
                 else if (PINB7 | PINB5 | PINB4) completo = true;
-            }
-            else if (patron[contador] == 2) {
+                break;
+            case 2:
                 if (!PB5_actual && PB5_anterior) contador++;
                 else if (PINB6 | PINB7 | PINB4) completo = true;
-            }
-            else if (patron[contador] == 0) {
+                break;
+            case 1:
                 if (!PB4_actual && PB4_anterior) contador++;
                 else if (PINB6 | PINB5 | PINB7) completo = true;
-            }            
+                break;            
+            default:
+                break;
+            }           
         } else{
             completo = true;
             esEntradaCorrecta = true; 
-        }
+        }*/
         
-        default:
-            // Manejar estado desconocido
-            //estado = IDLE;
-            break;
-    }
-    PB7_anterior = PB7_actual;
-    PB6_anterior = PB6_actual;
-    PB5_anterior = PB5_actual;
-    PB4_anterior = PB4_actual;
+        PB7_anterior = PB7_actual;
+        PB6_anterior = PB6_actual;
+        PB5_anterior = PB5_actual;
+        PB4_anterior = PB4_actual;
+        if (estado == ESPERA_ENTRADA) revisar = true;
+    
 }
 
 
@@ -111,7 +111,8 @@ int main(void)
             // Configurar parpadeos iniciales y periodo               
                 // Verificar botón
                 if (BotonEncendido) {
-                    parpadear(2, 100);
+                    parpadear(2, PERIODO_OTROS);
+                    BotonEncendido = false;
                     estado = PATRON;
                 }
                 break;
@@ -123,18 +124,47 @@ int main(void)
                 break;
 
             case ESPERA_ENTRADA: // Esperar entrada del usuario
+                if (contador < parpadeos){
+                    while (revisar){
+                        switch (patron[contador]){
+                            case 4:
+                                if (PB7_actual) contador++; //para que se accione en el flanco negativo
+                                else if (PB6_actual | PB5_actual | PB4_actual) completo = true; // la lógica de estados reconoce completo para que se salga de este flujo
+                                break;
+                            case 3:
+                                if (PB6_actual) contador++;
+                                else if (PB7_actual | PB5_actual | PB4_actual) completo = true;
+                                break;
+                            case 2:
+                                if (PB5_actual) contador++;
+                                else if (PB6_actual | PB7_actual | PB4_actual) completo = true;
+                                break;
+                            case 1:
+                                if (PB4_actual) contador++;
+                                else if (PB6_actual | PB5_actual | PB7_actual) completo = true;
+                                break;            
+                            default:
+                                break;
+                            }
+                            revisar = false;        
+                        }                     
+                } else{
+                    completo = true;
+                    esEntradaCorrecta = true; 
+                }
 
                 // Verificar entrada del usuario
                 if (esEntradaCorrecta & completo) {
                     // Ajustar configuración si la entrada es correcta                    
                     periodo -= 200 ;
                     esEntradaCorrecta = false; // reseteamos para la siguiente iteración
+                    completo = false;
                     parpadeos++ ;  //aumenta un parpadeo
                     contador = 0; // se reinicia
 
                     // Verificar periodo para decidir el siguiente estado
                     if (periodo == 0) {
-                        parpadear(4, 100); // Parpadeo 
+                        parpadear(4, PERIODO_OTROS); // Parpadeo 
                         // Volver al estado inicial
                         estado = IDLE;
                     } else {
@@ -144,7 +174,7 @@ int main(void)
 
                 } else if (!esEntradaCorrecta & completo){
                     // Si la entrada no es correcta, volver a IDLE
-                    parpadear(3, 100); // Parpadeo parpadeos
+                    parpadear(3, PERIODO_OTROS); // Parpadeo parpadeos
                     // Volver al estado inicial
                     estado = IDLE;
                 }
