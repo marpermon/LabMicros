@@ -62,7 +62,7 @@ ISR(TIMER0_OVF_vect)
 int main(void)
 {
     DDRB = 0x0F; //Configuracion del puerto como entrada o salida
-    GIMSK |= (1 << PCIE);     // Habilitar interrupciones de cambio de estado para todos los pines
+    GIMSK |= (1 << 5);     // Habilitar interrupciones de cambio de estado para pin0
     PCMSK |= (1 << PCINT7);   // Habilitar interrupción en el pin PB7
     PCMSK |= (1 << PCINT6);   // Habilitar interrupción en el pin PB6
     PCMSK |= (1 << PCINT5);   // Habilitar interrupción en el pin PB5
