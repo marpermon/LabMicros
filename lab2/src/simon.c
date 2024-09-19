@@ -22,7 +22,7 @@ volatile int parpadeos = INICIAL_PARPADEOS;
 volatile int periodo = INICIAL_PERIODO;
 volatile int contador = 0;
 volatile int patron[] = {1,2,4,3,1,1,3,4,2,3,2,4,1}; //leds que se encenderán
-
+volatile bool rebote = true;
 volatile bool revisar = false;
 volatile bool BotonEncendido = false;
 volatile bool completo = false;
@@ -39,8 +39,8 @@ ISR(PCINT_B_vect){ //subrutina de interrupción con el vector pcint0
         PB5_actual = (PINB & (1 << PB5)) != 0;  // Read the state of PB5
         PB4_actual = (PINB & (1 << PB4)) != 0;  // Read the state of PB4
     
-        if (estado == IDLE) {
-            if ((PB7_actual) || (PB6_actual) || (PB5_actual) || (PB4_actual)){
+        if ((estado == IDLE)&&(rebote == false)) {
+            if ((!PB7_anterior && PB7_actual) || (!PB6_anterior && PB6_actual) || (!PB5_anterior && PB5_actual) || (!PB4_anterior && PB4_actual)){               
                 BotonEncendido = true;
             }
         }    
@@ -80,6 +80,8 @@ int main(void)
     while (1) {
         switch (estado) {
             case IDLE:
+            delay_ms_p(100);
+            rebote = false;
             // Configurar parpadeos iniciales y periodo 
             parpadeos = INICIAL_PARPADEOS;
             periodo = INICIAL_PERIODO;              
@@ -102,20 +104,20 @@ int main(void)
                     while (revisar){
                         switch (patron[contador]){
                             case 4:
-                                if (PB7_actual) contador++; //para que se accione en el flanco negativo
-                                else if (PB6_actual | PB5_actual | PB4_actual) completo = true; // la lógica de estados reconoce completo para que se salga de este flujo
+                                if (!PB7_actual) contador++; //para que se accione en el flanco negativo
+                                else if (!PB6_actual | !PB5_actual | !PB4_actual) completo = true; // la lógica de estados reconoce completo para que se salga de este flujo
                                 break;
                             case 3:
-                                if (PB6_actual) contador++;
-                                else if (PB7_actual | PB5_actual | PB4_actual) completo = true;
+                                if (!PB6_actual) contador++;
+                                else if (!PB7_actual | !PB5_actual | !PB4_actual) completo = true;
                                 break;
                             case 2:
-                                if (PB5_actual) contador++;
-                                else if (PB6_actual | PB7_actual | PB4_actual) completo = true;
+                                if (!PB5_actual) contador++;
+                                else if (!PB6_actual | !PB7_actual | !PB4_actual) completo = true;
                                 break;
                             case 1:
-                                if (PB4_actual) contador++;
-                                else if (PB6_actual | PB5_actual | PB7_actual) completo = true;
+                                if (!PB4_actual) contador++;
+                                else if (!PB6_actual | !PB5_actual | !PB7_actual) completo = true;
                                 break;            
                             default:
                                 break;
