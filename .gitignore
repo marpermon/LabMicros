@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-*/src/*.cod
-*/src/*.o
-*/src/*.lst
-*/src/*.asm
-*/src/*backup.simu
-=======
 */src/*.cod
 */src/*.hex
 */src/*.o
@@ -12,5 +5,5 @@
 */src/*.asm
 */src/*.bin
 */src/*backup.simu
->>>>>>> 2c07b2623af23951bfb6d0668abb34bd1e174ecc
+*/src/*.csv
 SimulIDE_0.4.15-SR10_Win32/
