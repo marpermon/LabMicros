@@ -5,4 +5,5 @@
 */src/*.asm
 */src/*.bin
 */src/*backup.simu
+*/src/*/build
 SimulIDE_0.4.15-SR10_Win32/
