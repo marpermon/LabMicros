@@ -72,7 +72,7 @@ switch (digitalRead(ACDC)) {
     SquareV3 = sqrt(SquareV3/SAMPLES);
 
     pantalla.setCursor(0, 1);
-    imprimir_lcd("V0 RS=", SquareV0);
+    imprimir_lcd("V0 RMS=", SquareV0);
 
     pantalla.setCursor(0, 2);
     imprimir_lcd("V1 RMS=", SquareV1);   
