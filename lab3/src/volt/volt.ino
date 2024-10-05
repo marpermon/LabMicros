@@ -94,5 +94,8 @@ void imprimir_lcd(char str[15], double V){
   }
 
 void puerto_serial(double V0, double V1, double V2, double V3){
-  Serial.print(V0); Serial.print(", ");Serial.print(V1); Serial.print(", ");Serial.print(V2); Serial.print(", ");Serial.println(V3);
+  Serial.println(V0); 
+  Serial.println(V1);
+  Serial.println(V2);
+  Serial.println(V3);
   }
