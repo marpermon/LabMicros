@@ -29,10 +29,10 @@ void loop() {
 
 switch (digitalRead(ACDC)) {
   case HIGH: // En DC
-    V0 = ((analogRead(ANALOG0)*5.0/1023.0)-2.4)*(49.0/5.0);   // leer entrada analógica y transformarla al rango original
-    V1 = ((analogRead(ANALOG1)*5.0/1023.0)-2.4)*(49.0/5.0); 
-    V2 = ((analogRead(ANALOG2)*5.0/1023.0)-2.4)*(49.0/5.0); 
-    V3 = ((analogRead(ANALOG3)*5.0/1023.0)-2.4)*(49.0/5.0); 
+    V0 = ((analogRead(ANALOG0)*5.0/1023.0)-2.45)*(50.0/5.0);   // leer entrada analógica y transformarla al rango original
+    V1 = ((analogRead(ANALOG1)*5.0/1023.0)-2.45)*(50.0/5.0); 
+    V2 = ((analogRead(ANALOG2)*5.0/1023.0)-2.45)*(50.0/5.0); 
+    V3 = ((analogRead(ANALOG3)*5.0/1023.0)-2.45)*(50.0/5.0); 
     
     pantalla.setCursor(0, 1);
     if (abs(V0) > 24) pantalla.print("Peligro!"); // Si el valor leído es es mayor a 24, encendemos alarma
@@ -64,10 +64,10 @@ switch (digitalRead(ACDC)) {
     for (int i = 0; i < SAMPLES; i++) { 
     /* Usamos 500 samples en un periodo para determinar el
     valor pico de la señal*/
-        V0 = ((analogRead(ANALOG0)*5.0/1023.0)-2.4)*(49.0/5.0);   // leer entrada analógica y transformarla al rango original
-        V1 = ((analogRead(ANALOG1)*5.0/1023.0)-2.4)*(49.0/5.0); 
-        V2 = ((analogRead(ANALOG2)*5.0/1023.0)-2.4)*(49.0/5.0); 
-        V3 = ((analogRead(ANALOG3)*5.0/1023.0)-2.4)*(49.0/5.0);
+        V0 = ((analogRead(ANALOG0)*5.0/1023.0)-2.45)*(50.0/5.0);   // leer entrada analógica y transformarla al rango original
+        V1 = ((analogRead(ANALOG1)*5.0/1023.0)-2.45)*(50.0/5.0); 
+        V2 = ((analogRead(ANALOG2)*5.0/1023.0)-2.45)*(50.0/5.0); 
+        V3 = ((analogRead(ANALOG3)*5.0/1023.0)-2.45)*(50.0/5.0);
 
         if (abs(V0) > 24) {
           pantalla.print("Peligro!"); // Si el valor leído es es mayor a 24, encendemos alarma
