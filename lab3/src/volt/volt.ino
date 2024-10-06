@@ -1,9 +1,8 @@
-#define ANALOG0 A0
+#define ANALOG0 A0 // Pines analógicos
 #define ANALOG1 A1
 #define ANALOG2 A2
 #define ANALOG3 A3
-#define ACDC 8
-#define FRECUENCIA 60
+#define ACDC 8 //Pin digital
 #define SAMPLES 500
 
 
@@ -59,7 +58,7 @@ switch (digitalRead(ACDC)) {
         V1 = (analogRead(ANALOG1) * 48.0 / 1023.0) - 24.0; 
         V2 = (analogRead(ANALOG2) * 48.0 / 1023.0) - 24.0; 
         V3 = (analogRead(ANALOG3) * 48.0 / 1023.0) - 24.0;
-        MaxV0 = (V0 > MaxV0) ? V0 : MaxV0;
+        MaxV0 = (V0 > MaxV0) ? V0 : MaxV0; // Si el valor leído es es máximo se le asigna a la variable
         MaxV1 = (V1 > MaxV1) ? V1 : MaxV1;
         MaxV2 = (V2 > MaxV2) ? V2 : MaxV2;
         MaxV3 = (V3 > MaxV3) ? V3 : MaxV3; 
@@ -67,7 +66,7 @@ switch (digitalRead(ACDC)) {
 
 
     pantalla.setCursor(0, 1);
-    imprimir_lcd("V0 RMS=", MaxV0/sqrt(2));
+    imprimir_lcd("V0 RMS=", MaxV0/sqrt(2)); //Usamos la raíz cuadrada del valor máximo
 
     pantalla.setCursor(0, 2);
     imprimir_lcd("V1 RMS=", MaxV1/sqrt(2));   
@@ -84,7 +83,7 @@ switch (digitalRead(ACDC)) {
   
 }
 
-void imprimir_lcd(char str[15], double V){
+void imprimir_lcd(char str[15], double V){ 
   pantalla.print(str); pantalla.print(V);
   }
 
