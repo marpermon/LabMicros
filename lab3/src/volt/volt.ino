@@ -9,7 +9,7 @@
 #include <PCD8544.h>
 double V0, V1, V2, V3;
 double MaxV0 = 0.0, MaxV1 = 0.0, MaxV2 = 0.0, MaxV3 = 0.0;
-double referencia = 4.84; // tensión máxima de las señales
+double impr[4] = {0,0,0,0};
 
 PCD8544 pantalla;
 
@@ -19,7 +19,7 @@ void puerto_serial(double V0, double V1, double V2, double V3); // funcion para 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600); // Puerto serial   
-  analogReference(referencia);// Desingnamos la referencia como la tensión máxima recibida por el arduino, que equivaldrá a 1023
+  analogReference(5);// Desingnamos la referencia como la tensión máxima recibida por el arduino, que equivaldrá a 1023
   pinMode(ACDC, INPUT); // Usamos el interruptor como input
   pantalla.begin();
 }
@@ -29,23 +29,33 @@ void loop() {
 
 switch (digitalRead(ACDC)) {
   case HIGH: // En DC
-    V0 = (analogRead(ANALOG0) * 48.0 / 1023.0) - 24.0;   // leer entrada analógica y transformarla al rango original
-    V1 = (analogRead(ANALOG1) * 48.0 / 1023.0) - 24.0; 
-    V2 = (analogRead(ANALOG2) * 48.0 / 1023.0) - 24.0; 
-    V3 = (analogRead(ANALOG3) * 48.0 / 1023.0) - 24.0; 
-    pantalla.setCursor(0, 1); // Coloca lo que se va a imprimir en una posición enl a pantalla
-    imprimir_lcd("V0 =", V0); // Imprime en la pantalla
+    V0 = ((analogRead(ANALOG0)*5.0/1023.0)-2.4)*(49.0/5.0);   // leer entrada analógica y transformarla al rango original
+    V1 = ((analogRead(ANALOG1)*5.0/1023.0)-2.4)*(49.0/5.0); 
+    V2 = ((analogRead(ANALOG2)*5.0/1023.0)-2.4)*(49.0/5.0); 
+    V3 = ((analogRead(ANALOG3)*5.0/1023.0)-2.4)*(49.0/5.0); 
+    
+    pantalla.setCursor(0, 1);
+    if (abs(V0) > 24) pantalla.print("Peligro!"); // Si el valor leído es es mayor a 24, encendemos alarma
+    else imprimir_lcd("V0 =", V0); // Usamos la raíz cuadrada del valor máximo
 
     pantalla.setCursor(0, 2);
-    imprimir_lcd("V1 =", V1);   
+    if (abs(V1) > 24) pantalla.print("Peligro!"); 
+    else imprimir_lcd("V1 =", V1);   
 
     pantalla.setCursor(0, 3);
-    imprimir_lcd("V2 =", V2);
+    if (abs(V2) > 24) pantalla.print("Peligro!"); 
+    else imprimir_lcd("V2 =", V2);
 
     pantalla.setCursor(0, 4);
-    imprimir_lcd("V3 =", V3);
-    
-    puerto_serial(V0, V1, V2, V3); // Imprime en ele puerto serial
+    if (abs(V3) > 24) pantalla.print("Peligro!"); 
+    else imprimir_lcd("V3 =", V3);
+
+    impr[0] = (abs(V0) > 24) ? 999 : V0; // Si el abs del valor leído es es mayor a 24 , indicamos un numero alto
+    impr[1] = (abs(V1) > 24) ? 999 : V1;
+    impr[2] = (abs(V2) > 24) ? 999 : V2;
+    impr[3] = (abs(V3) > 24) ? 999 : V3; 
+
+    puerto_serial(impr[0], impr[1], impr[2], impr[3]);
     
 
   break;
@@ -54,14 +64,36 @@ switch (digitalRead(ACDC)) {
     for (int i = 0; i < SAMPLES; i++) { 
     /* Usamos 500 samples en un periodo para determinar el
     valor pico de la señal*/
-        V0 = (analogRead(ANALOG0) * 48.0 / 1023.0) - 24.0;   // leer entrada analógica y transformarla al rango original
-        V1 = (analogRead(ANALOG1) * 48.0 / 1023.0) - 24.0; 
-        V2 = (analogRead(ANALOG2) * 48.0 / 1023.0) - 24.0; 
-        V3 = (analogRead(ANALOG3) * 48.0 / 1023.0) - 24.0;
-        MaxV0 = (V0 > MaxV0) ? V0 : MaxV0; // Si el valor leído es es máximo se le asigna a la variable
-        MaxV1 = (V1 > MaxV1) ? V1 : MaxV1;
-        MaxV2 = (V2 > MaxV2) ? V2 : MaxV2;
-        MaxV3 = (V3 > MaxV3) ? V3 : MaxV3; 
+        V0 = ((analogRead(ANALOG0)*5.0/1023.0)-2.4)*(49.0/5.0);   // leer entrada analógica y transformarla al rango original
+        V1 = ((analogRead(ANALOG1)*5.0/1023.0)-2.4)*(49.0/5.0); 
+        V2 = ((analogRead(ANALOG2)*5.0/1023.0)-2.4)*(49.0/5.0); 
+        V3 = ((analogRead(ANALOG3)*5.0/1023.0)-2.4)*(49.0/5.0);
+
+        if (abs(V0) > 24) {
+          pantalla.print("Peligro!"); // Si el valor leído es es mayor a 24, encendemos alarma
+          MaxV0 = 1413; // 1413 entre raiz de 2 es aproximadamente 999
+        } 
+        else MaxV0 = (V0 > MaxV0) ? V0 : MaxV0; // Si el valor leído es es máximo se le asigna a la variable
+        
+        if (abs(V1) > 24) {
+          pantalla.print("Peligro!");
+          MaxV1 = 1413;
+        } 
+        else MaxV1 = (V1 > MaxV1) ? V1 : MaxV1; 
+        
+        if (abs(V2) > 24) {
+          pantalla.print("Peligro!");
+          MaxV2 = 1413;
+        } 
+        else MaxV2 = (V2 > MaxV2) ? V2 : MaxV2; 
+        
+        if (abs(V3) > 24) {
+          pantalla.print("Peligro!");
+          MaxV3 = 1413;
+        } 
+        else MaxV3 = (V3 > MaxV3) ? V3 : MaxV3; 
+
+
     }
 
 
@@ -77,7 +109,14 @@ switch (digitalRead(ACDC)) {
     pantalla.setCursor(0, 4);
     imprimir_lcd("V3 RMS=", MaxV3/sqrt(2));
 
-    puerto_serial(MaxV0/sqrt(2), MaxV1/sqrt(2), MaxV2/sqrt(2), MaxV3/sqrt(2));
+    impr[0] = MaxV0/sqrt(2); // Si el valor leído es es máximo se le asigna a la variable
+    impr[1] = MaxV1/sqrt(2);
+    impr[2] = MaxV2/sqrt(2);
+    impr[3] = MaxV3/sqrt(2); 
+
+    puerto_serial(impr[0], impr[1], impr[2], impr[3]);
+  
+  break;
   }
 
   
