@@ -3,7 +3,7 @@
 #define ANALOG2 A2
 #define ANALOG3 A3
 #define ACDC 8 //Pin digital
-#define SAMPLES 500
+#define SAMPLES 300
 
 
 #include <PCD8544.h>
@@ -35,19 +35,19 @@ switch (digitalRead(ACDC)) {
     V3 = ((analogRead(ANALOG3)*5.0/1023.0)-2.45)*(50.0/5.0); 
     
     pantalla.setCursor(0, 1);
-    if (abs(V0) > 24) pantalla.print("Peligro!"); // Si el valor leído es es mayor a 24, encendemos alarma
+    if (abs(V0) > 24) pantalla.print("Peligro! V0  "); // Si el valor leído es es mayor a 24, encendemos alarma
     else imprimir_lcd("V0 =", V0); // Usamos la raíz cuadrada del valor máximo
 
     pantalla.setCursor(0, 2);
-    if (abs(V1) > 24) pantalla.print("Peligro!"); 
+    if (abs(V1) > 24) pantalla.print("Peligro! V1  "); 
     else imprimir_lcd("V1 =", V1);   
 
     pantalla.setCursor(0, 3);
-    if (abs(V2) > 24) pantalla.print("Peligro!"); 
+    if (abs(V2) > 24) pantalla.print("Peligro! V2  "); 
     else imprimir_lcd("V2 =", V2);
 
     pantalla.setCursor(0, 4);
-    if (abs(V3) > 24) pantalla.print("Peligro!"); 
+    if (abs(V3) > 24) pantalla.print("Peligro! V3  "); 
     else imprimir_lcd("V3 =", V3);
 
     impr[0] = (abs(V0) > 24) ? 999 : V0; // Si el abs del valor leído es es mayor a 24 , indicamos un numero alto
@@ -70,25 +70,29 @@ switch (digitalRead(ACDC)) {
         V3 = ((analogRead(ANALOG3)*5.0/1023.0)-2.45)*(50.0/5.0);
 
         if (abs(V0) > 24) {
-          pantalla.print("Peligro!"); // Si el valor leído es es mayor a 24, encendemos alarma
+          pantalla.setCursor(0, 1);
+          pantalla.print("Peligro! V0  "); // Si el valor leído es es mayor a 24, encendemos alarma
           MaxV0 = 1413; // 1413 entre raiz de 2 es aproximadamente 999
         } 
         else MaxV0 = (V0 > MaxV0) ? V0 : MaxV0; // Si el valor leído es es máximo se le asigna a la variable
         
         if (abs(V1) > 24) {
-          pantalla.print("Peligro!");
+          pantalla.setCursor(0, 2);
+          pantalla.print("Peligro! V1  ");
           MaxV1 = 1413;
         } 
         else MaxV1 = (V1 > MaxV1) ? V1 : MaxV1; 
         
         if (abs(V2) > 24) {
-          pantalla.print("Peligro!");
+          pantalla.setCursor(0, 3);
+          pantalla.print("Peligro! V2  ");
           MaxV2 = 1413;
         } 
         else MaxV2 = (V2 > MaxV2) ? V2 : MaxV2; 
         
         if (abs(V3) > 24) {
-          pantalla.print("Peligro!");
+          pantalla.setCursor(0, 4);
+          pantalla.print("Peligro! V3  ");
           MaxV3 = 1413;
         } 
         else MaxV3 = (V3 > MaxV3) ? V3 : MaxV3; 
