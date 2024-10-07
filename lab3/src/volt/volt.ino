@@ -119,6 +119,10 @@ switch (digitalRead(ACDC)) {
     impr[3] = MaxV3/sqrt(2); 
 
     puerto_serial(impr[0], impr[1], impr[2], impr[3]);
+    MaxV0 = 0;
+    MaxV1 = 0;
+    MaxV2 = 0;
+    MaxV3 = 0;
   
   break;
   }
