@@ -3,7 +3,7 @@
 #define ANALOG2 A2
 #define ANALOG3 A3
 #define ACDC 8 //Pin digital
-#define SAMPLES 300
+#define SAMPLES 150
 
 
 #include <PCD8544.h>
