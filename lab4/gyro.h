@@ -2,6 +2,7 @@
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/usart.h>
 #include <libopencm3/stm32/spi.h>
+#include "console.h"
 
 // Gyroscope CS pin on PC1
 #define GYR_CS GPIOC, GPIO1
@@ -26,14 +27,15 @@ void write_register(uint8_t reg, uint8_t value);
 uint8_t read_register(uint8_t reg);
 int16_t read_axis(uint8_t reg_low, uint8_t reg_high);
 void calibrate_gyroscope(void);
+uint8_t check_gyroscope_connection(void);
 
-// Variables to store baseline (calibrated) values
+// Baseline values for gyroscope calibration
 int16_t x_baseline = 0;
 int16_t y_baseline = 0;
 int16_t z_baseline = 0;
 
-static void usart_setup(void)
-{
+// USART setup for console communication
+static void usart_setup(void) {
     rcc_periph_clock_enable(RCC_GPIOA);
     rcc_periph_clock_enable(RCC_USART1);
 
@@ -50,8 +52,8 @@ static void usart_setup(void)
     usart_enable(USART1);
 }
 
-static void spi_setup(void)
-{
+// SPI setup for gyroscope communication
+static void spi_setup(void) {
     rcc_periph_clock_enable(RCC_SPI5);
     rcc_periph_clock_enable(RCC_GPIOF);
     rcc_periph_clock_enable(RCC_GPIOC);
@@ -73,15 +75,104 @@ static void spi_setup(void)
     spi_enable(SPI5);
 }
 
-static void usart_print(const char *str)
-{
+// Check if gyroscope is connected by reading WHO_AM_I register
+uint8_t check_gyroscope_connection(void) {
+    usart_print("Checking gyroscope connection...\r\n");
+    gpio_clear(GYR_CS);  // Assert CS low
+
+    uint8_t who_am_i = read_register(GYR_WHO_AM_I);
+    gpio_set(GYR_CS);  // Deassert CS high
+
+    usart_print("WHO_AM_I register value read: ");
+    usart_print_int(who_am_i);
+    usart_print("\r\n");
+
+    if (who_am_i != 0xD4) {  // Replace with actual WHO_AM_I value for your device
+        usart_print("Gyroscope WHO_AM_I check failed.\r\n");
+    } else {
+        usart_print("Gyroscope detected successfully.\r\n");
+    }
+    return who_am_i;
+}
+
+// Read a register from the gyroscope over SPI
+uint8_t read_register(uint8_t reg) {
+    usart_print("Reading register: ");
+    usart_print_int(reg);
+    usart_print("\r\n");
+
+    gpio_clear(GYR_CS);  // Assert CS low
+    spi_send(SPI5, reg | 0x80);  // Set MSB high for read
+    spi_read(SPI5);  // Clear the read buffer
+
+    spi_send(SPI5, 0x00);
+    uint8_t value = spi_read(SPI5);
+    gpio_set(GYR_CS);  // Deassert CS high
+
+    usart_print("Received value: ");
+    usart_print_int(value);
+    usart_print("\r\n");
+
+    return value;
+}
+
+// Write a value to a gyroscope register over SPI
+void write_register(uint8_t reg, uint8_t value) {
+    usart_print("Writing to register: ");
+    usart_print_int(reg);
+    usart_print(", Value: ");
+    usart_print_int(value);
+    usart_print("\r\n");
+
+    gpio_clear(GYR_CS);  // Assert CS low
+    spi_send(SPI5, reg);
+    spi_read(SPI5);  // Clear the read buffer
+    spi_send(SPI5, value);
+    spi_read(SPI5);
+    gpio_set(GYR_CS);  // Deassert CS high
+}
+
+// Read and combine low and high register bytes for axis data
+int16_t read_axis(uint8_t reg_low, uint8_t reg_high) {
+    gpio_clear(GYR_CS);  // Assert CS low
+    
+    int16_t axis_data = read_register(reg_low);
+    axis_data |= read_register(reg_high) << 8;
+
+
+    return axis_data;
+    gpio_set(GYR_CS);  // Deassert CS high
+}
+
+// Calibrate gyroscope by setting the baseline for each axis
+void calibrate_gyroscope(void) {
+    gpio_clear(GYR_CS);  // Assert CS low
+    usart_print("Calibrating gyroscope...\r\n");
+
+    x_baseline = read_axis(GYR_OUT_X_L, GYR_OUT_X_H);
+    y_baseline = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H);
+    z_baseline = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H);
+
+    usart_print("Calibration complete. Baseline set to:\r\n");
+    usart_print("X baseline: ");
+    usart_print_int(x_baseline);
+    usart_print("\tY baseline: ");
+    usart_print_int(y_baseline);
+    usart_print("\tZ baseline: ");
+    usart_print_int(z_baseline);
+    usart_print("\r\n");
+    gpio_set(GYR_CS);  // Deassert CS high
+    }
+
+// Print string over USART for debugging
+static void usart_print(const char *str) {
     while (*str) {
         usart_send_blocking(USART1, *str++);
     }
 }
 
-static void usart_print_int(int32_t value)
-{
+// Print integer over USART for debugging
+static void usart_print_int(int32_t value) {
     char buffer[12];
     int pos = 10;
     buffer[11] = '\0';
@@ -98,100 +189,3 @@ static void usart_print_int(int32_t value)
 
     usart_print(&buffer[pos + 1]);
 }
-
-void write_register(uint8_t reg, uint8_t value)
-{
-    gpio_clear(GPIOC, GPIO1);
-    spi_send(SPI5, reg);
-    spi_read(SPI5);  // Clear the read buffer
-    spi_send(SPI5, value);
-    spi_read(SPI5);
-    gpio_set(GPIOC, GPIO1);
-}
-
-uint8_t read_register(uint8_t reg)
-{
-    uint8_t value;
-    gpio_clear(GPIOC, GPIO1);
-    spi_send(SPI5, reg | 0x80);  // Set MSB high for read
-    spi_read(SPI5);               // Clear the buffer
-    spi_send(SPI5, 0x00);
-    value = spi_read(SPI5);
-    gpio_set(GPIOC, GPIO1);
-    return value;
-}
-
-int16_t read_axis(uint8_t reg_low, uint8_t reg_high)
-{
-    int16_t axis_data = read_register(reg_low);
-    axis_data |= read_register(reg_high) << 8;
-    return axis_data;
-}
-
-// Calibrate the gyroscope by setting the initial position as the origin
-void calibrate_gyroscope(void)
-{
-    x_baseline = read_axis(GYR_OUT_X_L, GYR_OUT_X_H);
-    y_baseline = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H);
-    z_baseline = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H);
-
-    usart_print("Calibration complete. Baseline set.\r\n");
-    usart_print("X baseline: ");
-    usart_print_int(x_baseline);
-    usart_print("\tY baseline: ");
-    usart_print_int(y_baseline);
-    usart_print("\tZ baseline: ");
-    usart_print_int(z_baseline);
-    usart_print("\r\n");
-}
-
-/*int main(void)
-{
-    // Set up HSI (internal 16MHz clock) as the system clock
-    rcc_osc_on(RCC_HSI);
-    rcc_wait_for_osc_ready(RCC_HSI);
-    rcc_set_sysclk_source(RCC_CFGR_SW_HSI);
-    rcc_apb1_frequency = 16000000;
-    rcc_apb2_frequency = 16000000;
-
-    usart_setup();
-    spi_setup();
-
-    usart_print("Starting gyroscope setup...\r\n");
-
-    // Verify gyroscope by reading WHO_AM_I register
-    uint8_t who_am_i = read_register(GYR_WHO_AM_I);
-    usart_print("WHO_AM_I: ");
-    usart_print_int(who_am_i);
-    usart_print("\r\n");
-
-    // Configure gyroscope control registers
-    write_register(GYR_CTRL_REG1, 0x0F);  // Normal mode, all axes enabled
-    write_register(GYR_CTRL_REG4, 0x30);  // Full scale at ±2000 dps
-
-    usart_print("Gyroscope initialized.\r\n");
-
-    // Calibrate the gyroscope
-    calibrate_gyroscope();
-
-    // Continuously read and print X, Y, and Z axis data relative to baseline
-    while (1) {
-        int16_t x = read_axis(GYR_OUT_X_L, GYR_OUT_X_H) - x_baseline;
-        int16_t y = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H) - y_baseline;
-        int16_t z = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H) - z_baseline;
-
-        usart_print("X: ");
-        usart_print_int(x);
-        usart_print("\tY: ");
-        usart_print_int(y);
-        usart_print("\tZ: ");
-        usart_print_int(z);
-        usart_print("\r\n");
-
-        for (int i = 0; i < 3000000; i++) {
-            __asm__("NOP");
-        }
-    }
-
-    return 0;
-}*/
