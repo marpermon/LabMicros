@@ -75,55 +75,24 @@ static void spi_setup(void) {
     spi_enable(SPI5);
 }
 
-// Check if gyroscope is connected by reading WHO_AM_I register
-uint8_t check_gyroscope_connection(void) {
-    usart_print("Checking gyroscope connection...\r\n");
-    gpio_clear(GYR_CS);  // Assert CS low
 
-    uint8_t who_am_i = read_register(GYR_WHO_AM_I);
-    gpio_set(GYR_CS);  // Deassert CS high
 
-    usart_print("WHO_AM_I register value read: ");
-    usart_print_int(who_am_i);
-    usart_print("\r\n");
-
-    if (who_am_i != 0xD4) {  // Replace with actual WHO_AM_I value for your device
-        usart_print("Gyroscope WHO_AM_I check failed.\r\n");
-    } else {
-        usart_print("Gyroscope detected successfully.\r\n");
-    }
-    return who_am_i;
-}
 
 // Read a register from the gyroscope over SPI
 uint8_t read_register(uint8_t reg) {
-    usart_print("Reading register: ");
-    usart_print_int(reg);
-    usart_print("\r\n");
-
+    uint8_t value;
     gpio_clear(GYR_CS);  // Assert CS low
     spi_send(SPI5, reg | 0x80);  // Set MSB high for read
-    spi_read(SPI5);  // Clear the read buffer
-
+    spi_read(SPI5);               // Clear the buffer
     spi_send(SPI5, 0x00);
-    uint8_t value = spi_read(SPI5);
+    value = spi_read(SPI5);
     gpio_set(GYR_CS);  // Deassert CS high
-
-    usart_print("Received value: ");
-    usart_print_int(value);
-    usart_print("\r\n");
 
     return value;
 }
 
 // Write a value to a gyroscope register over SPI
 void write_register(uint8_t reg, uint8_t value) {
-    usart_print("Writing to register: ");
-    usart_print_int(reg);
-    usart_print(", Value: ");
-    usart_print_int(value);
-    usart_print("\r\n");
-
     gpio_clear(GYR_CS);  // Assert CS low
     spi_send(SPI5, reg);
     spi_read(SPI5);  // Clear the read buffer
@@ -135,13 +104,10 @@ void write_register(uint8_t reg, uint8_t value) {
 // Read and combine low and high register bytes for axis data
 int16_t read_axis(uint8_t reg_low, uint8_t reg_high) {
     gpio_clear(GYR_CS);  // Assert CS low
-    
     int16_t axis_data = read_register(reg_low);
     axis_data |= read_register(reg_high) << 8;
-
-
-    return axis_data;
     gpio_set(GYR_CS);  // Deassert CS high
+    return axis_data;   
 }
 
 // Calibrate gyroscope by setting the baseline for each axis
