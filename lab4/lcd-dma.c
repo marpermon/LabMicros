@@ -86,10 +86,19 @@ int main(void) {
     //gpio_set(GYR_CS);  // Deassert CS high
     gpio_set(GPIOC, GPIO1);
     // Continuously read and print X, Y, and Z axis data relative to baseline
+    
+    int16_t x = x_baseline;
+    int16_t y = y_baseline;
+    int16_t z = z_baseline;
+
     while (1) {
-        int16_t x = read_axis(GYR_OUT_X_L, GYR_OUT_X_H) - x_baseline;
-        int16_t y = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H) - y_baseline;
-        int16_t z = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H) - z_baseline;
+        draw_int(x_c-20, y_c, x, background_color);
+        draw_int(x_c-20, y_c+20, y, background_color);
+        draw_int(x_c-20, y_c+40, z, background_color);
+
+        x = read_axis(GYR_OUT_X_L, GYR_OUT_X_H) - x_baseline;
+        y = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H) - y_baseline;
+        z = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H) - z_baseline;
 
         usart_print("X: ");
         usart_print_int(x);
@@ -105,7 +114,7 @@ int main(void) {
         draw_string(x_c, y_c+40, "Z: ", text_color);
         draw_int(x_c-20, y_c+40, z, text_color);
 
-        for (int i = 0; i < 3000000; i++) {
+        for (int i = 0; i < 3000000; i++) {//delay
             __asm__("NOP");
         }
     }

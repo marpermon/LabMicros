@@ -484,17 +484,11 @@ void draw_string(int x, int y, char *str, uint32_t color)
 
 
 void draw_int(int x, int y, int num, uint32_t color) {
-    char *buffer = (char *)malloc(20 * sizeof(char));  // Allocate memory for the string
-    if (buffer == NULL) {
-        printf("Memory allocation failed.\n");
-        return;
-    }
-
-    snprintf(buffer, 20, "%d", num);  // Convert int to string
+    char buffer[12];  // Allocate memory for the string
+    snprintf(buffer, sizeof(buffer), "%d", num);  // Convert int to string
     draw_string(x, y, buffer, color);           // Print the string representation
-    free(buffer);                      // Free the allocated memory
-
 }
+
 
 
 
