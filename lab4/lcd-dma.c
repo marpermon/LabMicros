@@ -30,20 +30,16 @@ int main(void) {
     spi_setup();
     clock_setup();
 
-    usart_print("Starting gyroscope setup...\r\n");
 
     // Verify gyroscope by reading WHO_AM_I register
     uint8_t who_am_i = read_register(GYR_WHO_AM_I);
-    usart_print("WHO_AM_I: ");
     usart_print_int(who_am_i);
     usart_print("\r\n");
 
     // Configure gyroscope control registers
     write_register(GYR_CTRL_REG1, 0x0F);  // Normal mode, all axes enabled
-    usart_print("reg1\r\n");
     write_register(GYR_CTRL_REG4, 0x30);  // Full scale at ±2000 dps
 
-    usart_print("Gyroscope initialized.\r\n");
 
     //* set up USART 1. */
     console_setup(115200);
@@ -54,7 +50,6 @@ int main(void) {
     sdram_init();
     lcd_dma_init();
     lcd_spi_init();
-    usart_print("LCD\r\n");
     
 
 
@@ -68,9 +63,7 @@ int main(void) {
 
     // Set up HSI (internal 16MHz clock) as the system clock
     usart_print("Screen\r\n");
-    
 
-    
     // Calibrate the gyroscope
     calibrate_gyroscope();
 
@@ -83,7 +76,8 @@ int main(void) {
     int y_c = 20; // Starting y position
 
     gpio_set(GPIOC, GPIO2);	   /* Turn off chip select */
-    //gpio_set(GYR_CS);  // Deassert CS high
+
+  // Gyroscope CS pin on PC1
     gpio_set(GPIOC, GPIO1);
     // Continuously read and print X, Y, and Z axis data relative to baseline
     
@@ -92,10 +86,9 @@ int main(void) {
     int16_t z = z_baseline;
 
     while (1) {
-        draw_int(x_c-20, y_c, x, background_color);
+        draw_int(x_c-20, y_c, x, background_color); //borrar nùmero anterior
         draw_int(x_c-20, y_c+20, y, background_color);
         draw_int(x_c-20, y_c+40, z, background_color);
-
         x = read_axis(GYR_OUT_X_L, GYR_OUT_X_H) - x_baseline;
         y = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H) - y_baseline;
         z = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H) - z_baseline;

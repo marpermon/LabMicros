@@ -442,7 +442,7 @@ void draw_char(int x, int y, char c, uint32_t color)
 
 /* Function to draw a string */
 void draw_string(int x, int y, char *str, uint32_t color)
-{   gpio_clear(GPIOC, GPIO2); /* Select the LCD */
+{   gpio_clear(GPIOC, GPIO2); /* Select the LCD talvexz no es necesario*/
     while (*str)
     {
         // Find the end of the current line
@@ -488,7 +488,6 @@ void draw_int(int x, int y, int num, uint32_t color) {
     snprintf(buffer, sizeof(buffer), "%d", num);  // Convert int to string
     draw_string(x, y, buffer, color);           // Print the string representation
 }
-
 
 
 

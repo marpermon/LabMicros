@@ -4,8 +4,8 @@
 #include <libopencm3/stm32/spi.h>
 #include "console.h"
 
+
 // Gyroscope CS pin on PC1
-#define GYR_CS GPIOC, GPIO1
 
 // Gyroscope register addresses
 #define GYR_WHO_AM_I 0x0F
@@ -81,38 +81,38 @@ static void spi_setup(void) {
 // Read a register from the gyroscope over SPI
 uint8_t read_register(uint8_t reg) {
     uint8_t value;
-    gpio_clear(GYR_CS);  // Assert CS low
+    gpio_clear(GPIOC, GPIO1);  // Assert CS low, 
     spi_send(SPI5, reg | 0x80);  // Set MSB high for read
     spi_read(SPI5);               // Clear the buffer
     spi_send(SPI5, 0x00);
     value = spi_read(SPI5);
-    gpio_set(GYR_CS);  // Deassert CS high
+    gpio_set(GPIOC, GPIO1);  // Deassert CS high , importante para la comunicaciòn 
+    //SPI
+    //usart_print("A\n");
 
     return value;
 }
 
 // Write a value to a gyroscope register over SPI
 void write_register(uint8_t reg, uint8_t value) {
-    gpio_clear(GYR_CS);  // Assert CS low
+    gpio_clear(GPIOC, GPIO1);  // Assert CS low
     spi_send(SPI5, reg);
     spi_read(SPI5);  // Clear the read buffer
     spi_send(SPI5, value);
     spi_read(SPI5);
-    gpio_set(GYR_CS);  // Deassert CS high
+    gpio_set(GPIOC, GPIO1);  // Deassert CS high
 }
 
 // Read and combine low and high register bytes for axis data
 int16_t read_axis(uint8_t reg_low, uint8_t reg_high) {
-    gpio_clear(GYR_CS);  // Assert CS low
     int16_t axis_data = read_register(reg_low);
     axis_data |= read_register(reg_high) << 8;
-    gpio_set(GYR_CS);  // Deassert CS high
     return axis_data;   
 }
 
 // Calibrate gyroscope by setting the baseline for each axis
 void calibrate_gyroscope(void) {
-    gpio_clear(GYR_CS);  // Assert CS low
+    gpio_clear(GPIOC, GPIO1);  // Assert CS low
     usart_print("Calibrating gyroscope...\r\n");
 
     x_baseline = read_axis(GYR_OUT_X_L, GYR_OUT_X_H);
@@ -127,7 +127,7 @@ void calibrate_gyroscope(void) {
     usart_print("\tZ baseline: ");
     usart_print_int(z_baseline);
     usart_print("\r\n");
-    gpio_set(GYR_CS);  // Deassert CS high
+    gpio_set(GPIOC, GPIO1);  // Deassert CS high
     }
 
 // Print string over USART for debugging
