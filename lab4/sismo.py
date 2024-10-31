@@ -26,13 +26,13 @@ client.connect(broker, port, keepalive=60)
 
 while True:
     data_captured = serial_port.readline().decode('utf-8').replace('\r', "").replace("\n", "").split('\t')
-    if len(data_captured) >= 3:
+    if len(data_captured) >= 4:
         data = {
             "x": int(data_captured[0].split()[1]),
             "y": int(data_captured[1].split()[1]),
-            "z": int(data_captured[2].split()[1])
+            "z": int(data_captured[2].split()[1]),
+            "Battery Low": int(data_captured[3].split()[1])
             #,
-            #"Battery Low": "Si" if data_captured[3] == '1' else "No",
             #"Battery Level": data_captured[4]
         }
         output = json.dumps(data)
