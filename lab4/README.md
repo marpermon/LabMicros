@@ -9,4 +9,4 @@ arm-none-eabi-objcopy -O binary lcd-dma.elf firmware.bin
 
 st-flash --reset write firmware.bin 0x8000000
 
-4. Abra otra terminal y corra el archivo sismo.py de la siguiente forma: python3 sismo.py
+4. Abra otra terminal y corra el archivo `sismo.py` de la siguiente forma: `python3 sismo.py` 
