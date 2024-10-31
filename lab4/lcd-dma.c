@@ -18,7 +18,42 @@
 #include "gyro.h"
 #include "pantalla.h"
 
+static void gpio_setup(void);
+static void button_setup(void);
+bool boton(void);
+
+static void gpio_setup(void)
+{
+	/* Enable GPIOG clock. */
+	rcc_periph_clock_enable(RCC_GPIOG);
+
+	/* Set GPIO13 (in GPIO port G) to 'output push-pull'. */
+	gpio_mode_setup(GPIOG, GPIO_MODE_OUTPUT,
+			GPIO_PUPD_NONE, GPIO13);
+}
+
+static void button_setup(void)
+{
+	/* Enable GPIOA clock. */
+	rcc_periph_clock_enable(RCC_GPIOA);
+
+	/* Set GPIO0 (in GPIO port A) to 'input open-drain'. */
+	gpio_mode_setup(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
+}
+
+bool boton(void){ 
+    if (gpio_get(GPIOA, GPIO0)) {
+        for (int i = 0; i < 30000; i++) {		
+            __asm__("nop");//debounce
+        } if (gpio_get(GPIOA, GPIO0)) {
+            return true;
+        }
+    }
+    return false;		
+}
+
 // USART setup for console
+
 
 int main(void) {
     rcc_osc_on(RCC_HSI);
@@ -80,12 +115,15 @@ int main(void) {
   // Gyroscope CS pin on PC1
     gpio_set(GPIOC, GPIO1);
     // Continuously read and print X, Y, and Z axis data relative to baseline
-    
+    button_setup();
+	gpio_setup();
+
+	
     int16_t x = x_baseline;
     int16_t y = y_baseline;
     int16_t z = z_baseline;
 
-    while (1) {
+    while (!boton()) {
         draw_int(x_c-20, y_c, x, background_color); //borrar nùmero anterior
         draw_int(x_c-20, y_c+20, y, background_color);
         draw_int(x_c-20, y_c+40, z, background_color);
