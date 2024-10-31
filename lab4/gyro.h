@@ -113,21 +113,15 @@ int16_t read_axis(uint8_t reg_low, uint8_t reg_high) {
 // Calibrate gyroscope by setting the baseline for each axis
 void calibrate_gyroscope(void) {
     gpio_clear(GPIOC, GPIO1);  // Assert CS low
-    usart_print("Calibrating gyroscope...\r\n");
 
     x_baseline = read_axis(GYR_OUT_X_L, GYR_OUT_X_H);
     y_baseline = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H);
     z_baseline = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H);
 
-    usart_print("Calibration complete. Baseline set to:\r\n");
-    usart_print("X baseline: ");
     usart_print_int(x_baseline);
-    usart_print("\tY baseline: ");
     usart_print_int(y_baseline);
-    usart_print("\tZ baseline: ");
     usart_print_int(z_baseline);
-    usart_print("\r\n");
-    gpio_set(GPIOC, GPIO1);  // Deassert CS high
+        gpio_set(GPIOC, GPIO1);  // Deassert CS high
     }
 
 // Print string over USART for debugging

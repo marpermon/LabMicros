@@ -19,20 +19,21 @@ client.username_pw_set(device_token)
 client.connect(broker, port, keepalive=60)
 
 # Función de callback para confirmar publicación
-def on_publish(client, userdata, result):
-    print("Datos publicados correctamente \n")
+# def on_publish(client, userdata, result):
+#    print("Datos publicados correctamente \n")
 
-client.on_publish = on_publish
+#client.on_publish = on_publish
 
 while True:
     data_captured = serial_port.readline().decode('utf-8').replace('\r', "").replace("\n", "").split('\t')
-    if len(data_captured) >= 4:
+    if len(data_captured) >= 3:
         data = {
-            "x": data_captured[0],
-            "y": data_captured[1],
-            "z": data_captured[2],
-            "Battery Low": "Si" if data_captured[3] == '1' else "No",
-            "Battery Level": data_captured[4]
+            "x": int(data_captured[0].split()[1]),
+            "y": int(data_captured[1].split()[1]),
+            "z": int(data_captured[2].split()[1])
+            #,
+            #"Battery Low": "Si" if data_captured[3] == '1' else "No",
+            #"Battery Level": data_captured[4]
         }
         output = json.dumps(data)
         print(output)

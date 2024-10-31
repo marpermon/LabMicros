@@ -18,19 +18,9 @@
 #include "gyro.h"
 #include "pantalla.h"
 
-static void gpio_setup(void);
 static void button_setup(void);
-bool boton(void);
+static void boton(bool *estado);
 
-static void gpio_setup(void)
-{
-	/* Enable GPIOG clock. */
-	rcc_periph_clock_enable(RCC_GPIOG);
-
-	/* Set GPIO13 (in GPIO port G) to 'output push-pull'. */
-	gpio_mode_setup(GPIOG, GPIO_MODE_OUTPUT,
-			GPIO_PUPD_NONE, GPIO13);
-}
 
 static void button_setup(void)
 {
@@ -41,15 +31,17 @@ static void button_setup(void)
 	gpio_mode_setup(GPIOA, GPIO_MODE_INPUT, GPIO_PUPD_NONE, GPIO0);
 }
 
-bool boton(void){ 
+static void boton(bool *estado)
+{   
+    bool A = false, B = false, C = false;
     if (gpio_get(GPIOA, GPIO0)) {
-        for (int i = 0; i < 30000; i++) {		
+        for (int i = 0; i < 1000000; i++) {
             __asm__("nop");//debounce
-        } if (gpio_get(GPIOA, GPIO0)) {
-            return true;
+            A = true;
+        } if (gpio_get(GPIOA, GPIO0) && A) {
+            *estado= !(*estado);
         }
     }
-    return false;		
 }
 
 // USART setup for console
@@ -85,7 +77,6 @@ int main(void) {
     sdram_init();
     lcd_dma_init();
     lcd_spi_init();
-    
 
 
     // Clear the screen by setting all pixels to a background color
@@ -93,11 +84,9 @@ int main(void) {
     for (size_t i = 0; i < LCD_LAYER1_PIXELS; i++)
     {
         lcd_layer1_frame_buffer[i] = background_color;
-
     }
 
     // Set up HSI (internal 16MHz clock) as the system clock
-    usart_print("Screen\r\n");
 
     // Calibrate the gyroscope
     calibrate_gyroscope();
@@ -115,39 +104,46 @@ int main(void) {
   // Gyroscope CS pin on PC1
     gpio_set(GPIOC, GPIO1);
     // Continuously read and print X, Y, and Z axis data relative to baseline
-    button_setup();
-	gpio_setup();
-
 	
+
     int16_t x = x_baseline;
     int16_t y = y_baseline;
     int16_t z = z_baseline;
 
-    while (!boton()) {
-        draw_int(x_c-20, y_c, x, background_color); //borrar nùmero anterior
-        draw_int(x_c-20, y_c+20, y, background_color);
-        draw_int(x_c-20, y_c+40, z, background_color);
-        x = read_axis(GYR_OUT_X_L, GYR_OUT_X_H) - x_baseline;
-        y = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H) - y_baseline;
-        z = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H) - z_baseline;
+    button_setup();
 
-        usart_print("X: ");
-        usart_print_int(x);
-        draw_string(x_c, y_c, "X: ", text_color);
-        draw_int(x_c-20, y_c, x, text_color);
-        usart_print("\tY: ");
-        usart_print_int(y);
-        draw_string(x_c, y_c+20, "Y: ", text_color);
-        draw_int(x_c-20, y_c+20, y, text_color);
-        usart_print("\tZ: ");
-        usart_print_int(z);
-        usart_print("\r\n");
-        draw_string(x_c, y_c+40, "Z: ", text_color);
-        draw_int(x_c-20, y_c+40, z, text_color);
+    bool conectar = true;
 
-        for (int i = 0; i < 3000000; i++) {//delay
-            __asm__("NOP");
+    while (1) {
+        while (conectar) {
+            draw_int(x_c-20, y_c, x, background_color); //borrar nùmero anterior
+            draw_int(x_c-20, y_c+20, y, background_color);
+            draw_int(x_c-20, y_c+40, z, background_color);
+            x = read_axis(GYR_OUT_X_L, GYR_OUT_X_H) - x_baseline;
+            y = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H) - y_baseline;
+            z = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H) - z_baseline;
+
+            usart_print("X: ");
+            usart_print_int(x);
+            draw_string(x_c, y_c, "X: ", text_color);
+            draw_int(x_c-20, y_c, x, text_color);
+            usart_print("\tY: ");
+            usart_print_int(y);
+            draw_string(x_c, y_c+20, "Y: ", text_color);
+            draw_int(x_c-20, y_c+20, y, text_color);
+            usart_print("\tZ: ");
+            usart_print_int(z);
+            usart_print("\r\n");
+            draw_string(x_c, y_c+40, "Z: ", text_color);
+            draw_int(x_c-20, y_c+40, z, text_color);
+
+            for (int i = 0; i < 3000000; i++) {//delay
+                __asm__("NOP");
+            }
+            boton(&conectar);
         }
+        //boton(&conectar);
+
     }
 
     return 0;
