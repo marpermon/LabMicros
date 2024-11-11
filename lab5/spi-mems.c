@@ -135,14 +135,6 @@ void calibrate_gyroscope(void)
     y_baseline = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H);
     z_baseline = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H);
 
-    usart_print("Calibration complete. Baseline set.\r\n");
-    usart_print("X baseline: ");
-    usart_print_int(x_baseline);
-    usart_print("\tY baseline: ");
-    usart_print_int(y_baseline);
-    usart_print("\tZ baseline: ");
-    usart_print_int(z_baseline);
-    usart_print("\r\n");
 }
 
 int main(void)
@@ -157,19 +149,10 @@ int main(void)
     usart_setup();
     spi_setup();
 
-    usart_print("Starting gyroscope setup...\r\n");
-
-    // Verify gyroscope by reading WHO_AM_I register
-    uint8_t who_am_i = read_register(GYR_WHO_AM_I);
-    usart_print("WHO_AM_I: ");
-    usart_print_int(who_am_i);
-    usart_print("\r\n");
 
     // Configure gyroscope control registers
     write_register(GYR_CTRL_REG1, 0x0F);  // Normal mode, all axes enabled
     write_register(GYR_CTRL_REG4, 0x30);  // Full scale at ±2000 dps
-
-    usart_print("Gyroscope initialized.\r\n");
 
     // Calibrate the gyroscope
     calibrate_gyroscope();
@@ -180,13 +163,12 @@ int main(void)
         int16_t y = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H) - y_baseline;
         int16_t z = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H) - z_baseline;
 
-        usart_print("X: ");
         usart_print_int(x);
-        usart_print("\tY: ");
+        usart_print(" ");
         usart_print_int(y);
-        usart_print("\tZ: ");
+        usart_print(" ");
         usart_print_int(z);
-        usart_print("\r\n");
+        usart_print("\n");
 
         for (int i = 0; i < 3000000; i++) {
             __asm__("NOP");
