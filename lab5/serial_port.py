@@ -16,16 +16,15 @@ with open(csv_filename, mode='w', newline='') as csv_file:
     csv_writer = csv.writer(csv_file)
     csv_writer.writerow(["x", "y", "z"])
 
-    while True:
+    start = time.time()
+
+    while time.time() - start < 15.0:
         try:
-            data_captured = serial_port.readline().decode('utf-8').replace('\n','').split(' ')
-            if not data_captured or len(data_captured) != 3:
-                continue
-            if len(data_captured) == 3:
-                for i in range(3):
-                    data_captured[i] = int(data_captured[i])
-                print(data_captured)
-                csv_writer.writerow(data_captured)
-            time.sleep(0.5)  # Controla la frecuencia de envío
+            data_captured = serial_port.readline().decode('utf-8').replace('\n','')
+            print(data_captured)
+            if len(data_captured.split()) == 3:
+                csv_writer.writerow(data_captured.split())
         except serial.serialutil.SerialException:
+            continue
+        except UnicodeDecodeError:
             continue

@@ -25,12 +25,7 @@ static void usart_print_int(int32_t value);
 void write_register(uint8_t reg, uint8_t value);
 uint8_t read_register(uint8_t reg);
 int16_t read_axis(uint8_t reg_low, uint8_t reg_high);
-void calibrate_gyroscope(void);
 
-// Variables to store baseline (calibrated) values
-int16_t x_baseline = 0;
-int16_t y_baseline = 0;
-int16_t z_baseline = 0;
 
 static void usart_setup(void)
 {
@@ -128,15 +123,6 @@ int16_t read_axis(uint8_t reg_low, uint8_t reg_high)
     return axis_data;
 }
 
-// Calibrate the gyroscope by setting the initial position as the origin
-void calibrate_gyroscope(void)
-{
-    x_baseline = read_axis(GYR_OUT_X_L, GYR_OUT_X_H);
-    y_baseline = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H);
-    z_baseline = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H);
-
-}
-
 int main(void)
 {
     // Set up HSI (internal 16MHz clock) as the system clock
@@ -145,23 +131,19 @@ int main(void)
     rcc_set_sysclk_source(RCC_CFGR_SW_HSI);
     rcc_apb1_frequency = 16000000;
     rcc_apb2_frequency = 16000000;
-
     usart_setup();
     spi_setup();
-
 
     // Configure gyroscope control registers
     write_register(GYR_CTRL_REG1, 0x0F);  // Normal mode, all axes enabled
     write_register(GYR_CTRL_REG4, 0x30);  // Full scale at ±2000 dps
 
-    // Calibrate the gyroscope
-    calibrate_gyroscope();
 
     // Continuously read and print X, Y, and Z axis data relative to baseline
     while (1) {
-        int16_t x = read_axis(GYR_OUT_X_L, GYR_OUT_X_H) - x_baseline;
-        int16_t y = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H) - y_baseline;
-        int16_t z = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H) - z_baseline;
+        int16_t x = read_axis(GYR_OUT_X_L, GYR_OUT_X_H);
+        int16_t y = read_axis(GYR_OUT_Y_L, GYR_OUT_Y_H);
+        int16_t z = read_axis(GYR_OUT_Z_L, GYR_OUT_Z_H);
 
         usart_print_int(x);
         usart_print(" ");
