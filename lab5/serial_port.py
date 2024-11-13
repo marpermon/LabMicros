@@ -18,11 +18,11 @@ with open(csv_filename, mode='w', newline='') as csv_file:
 
     start = time.time()
 
-    while time.time() - start < 15.0:
+    while time.time() - start < 20.0:
         try:
             data_captured = serial_port.readline().decode('utf-8').replace('\n','')
-            print(data_captured)
             if len(data_captured.split()) == 3:
+                print(data_captured)
                 csv_writer.writerow(data_captured.split())
         except serial.serialutil.SerialException:
             continue
