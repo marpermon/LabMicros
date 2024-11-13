@@ -138,7 +138,7 @@ void calibrate_gyroscope(void) {
     usart_print_int(x_baseline);
     usart_print_int(y_baseline);
     usart_print_int(z_baseline);
-        gpio_set(GPIOC, GPIO1);  // Deassert CS high
+    gpio_set(GPIOC, GPIO1);  // Deassert CS high
     }
 
 int main(void)
