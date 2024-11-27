@@ -225,7 +225,9 @@ int main(void)
             buffer_offset = BUFFER_SIZE - overlap;
         }
 
-
+    for (int i = 0; i < 300000; i++) {//delay
+                __asm__("NOP");
+            }
 
     }
 
