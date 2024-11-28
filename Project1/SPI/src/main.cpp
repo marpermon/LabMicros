@@ -10,15 +10,9 @@
 const int SENSOR_I2C_ADDRESS = 0x40;
 
 int main() {
-    // Initialize I2C
-    int sensor = wiringPiI2CSetup(SENSOR_I2C_ADDRESS);
-    if (sensor == -1) {
-        std::cerr << "Failed to initialize I2C communication." << std::endl;
-        return -1;
-    }
-
+    
     // Load TensorFlow Lite model
-    const tflite::Model* model = tflite::GetModel(model_tflite);
+    const tflite::Model* model = tflite::GetModel(model_optimized_tflite);
     if (model->version() != TFLITE_SCHEMA_VERSION) {
         std::cerr << "Model schema version is not compatible!" << std::endl;
         return -1;
